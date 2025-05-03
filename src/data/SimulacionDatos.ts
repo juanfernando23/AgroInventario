@@ -1,0 +1,191 @@
+import { User, Product, Movement, Sale } from '../types';
+
+export const mockUsers: User[] = [
+  {
+    id: '1',
+    name: 'Admin Usuario',
+    email: 'admin@agroinventario.com',
+    role: 'admin',
+    status: 'active',
+    lastLogin: '2025-04-15T10:30:00',
+  },
+  {
+    id: '2',
+    name: 'Empleado Ejemplo',
+    email: 'empleado@agroinventario.com',
+    role: 'employee',
+    status: 'active',
+    lastLogin: '2025-04-14T14:45:00',
+  },
+  {
+    id: '3',
+    name: 'María Rodriguez',
+    email: 'maria@agroinventario.com',
+    role: 'employee',
+    status: 'inactive',
+    lastLogin: '2025-03-25T09:20:00',
+  },
+];
+
+export const mockProducts: Product[] = [
+  {
+    id: '1',
+    sku: 'FERT-001',
+    name: 'Fertilizante Orgánico Premium',
+    description: 'Fertilizante orgánico de alta calidad para todo tipo de cultivos.',
+    category: 'Fertilizantes',
+    price: 179000,
+    stock: 120,
+    minStock: 20,
+    unit: 'kg',
+    imageUrl: 'https://todoparacafe.com/media/user_YnwzAmzlRo/1824/repunte.jpeg',
+    createdAt: '2025-01-15T08:30:00',
+  },
+  {
+    id: '2',
+    sku: 'SEM-001',
+    name: 'Semillas de Tomate Híbrido',
+    description: 'Semillas de tomate híbrido resistentes a enfermedades.',
+    category: 'Semillas',
+    price: 49000,
+    stock: 75,
+    minStock: 15,
+    unit: 'sobre',
+    imageUrl: 'https://foreroagro.com/tienda/wp-content/uploads/2019/02/SHBP1514-00-TOMATE-HIBRIDO-F1-WILLY.jpg',
+    createdAt: '2025-02-10T10:15:00',
+  },
+  {
+    id: '3',
+    sku: 'HERB-001',
+    name: 'Herbicida Selectivo',
+    description: 'Herbicida selectivo para el control de malezas en cultivos de maíz.',
+    category: 'Herbicidas',
+    price: 350000,
+    stock: 18,
+    minStock: 10,
+    unit: 'litro',
+    imageUrl: 'https://images.pexels.com/photos/2131784/pexels-photo-2131784.jpeg',
+    createdAt: '2025-03-05T14:20:00',
+  },
+  {
+    id: '4',
+    sku: 'TOOL-001',
+    name: 'Tijera de Podar Profesional',
+    description: 'Tijera de podar con mango ergonómico para uso profesional.',
+    category: 'Herramientas',
+    price: 135000,
+    stock: 8,
+    minStock: 5,
+    unit: 'unidad',
+    imageUrl: 'https://images.pexels.com/photos/4505168/pexels-photo-4505168.jpeg',
+    createdAt: '2025-03-20T09:45:00',
+  },
+
+];
+
+export const mockMovements: Movement[] = [
+  {
+    id: '1',
+    date: '2025-04-14T08:30:00',
+    type: 'entrada',
+    productId: '1',
+    productName: 'Fertilizante Orgánico Premium',
+    productSku: 'FERT-001',
+    quantity: 50,
+    userId: '1',
+    userName: 'Admin Usuario',
+    reason: 'Compra de inventario',
+    notes: 'Entrega realizada por Proveedores Agrícolas S.A.',
+  },
+  {
+    id: '2',
+    date: '2025-04-14T10:15:00',
+    type: 'salida',
+    productId: '2',
+    productName: 'Semillas de Tomate Híbrido',
+    productSku: 'SEM-001',
+    quantity: 10,
+    userId: '2',
+    userName: 'Empleado Ejemplo',
+    reason: 'Entrega a cliente',
+  },
+  {
+    id: '3',
+    date: '2025-04-15T09:20:00',
+    type: 'venta',
+    productId: '3',
+    productName: 'Herbicida Selectivo',
+    productSku: 'HERB-001',
+    quantity: 2,
+    userId: '1',
+    userName: 'Admin Usuario',
+    reason: 'Venta en tienda',
+  },
+  {
+    id: '4',
+    date: '2025-04-15T14:45:00',
+    type: 'ajuste',
+    productId: '4',
+    productName: 'Tijera de Podar Profesional',
+    productSku: 'TOOL-001',
+    quantity: -1,
+    userId: '1',
+    userName: 'Admin Usuario',
+    reason: 'Ajuste por inventario físico',
+    notes: 'Faltante en revisión mensual',
+  },
+];
+
+export const mockSales: Sale[] = [
+  {
+    id: '1',
+    date: '2025-04-15T09:20:00',
+    customer: 'Finca El Paraíso',
+    items: [
+      {
+        productId: '3',
+        productName: 'Herbicida Selectivo',
+        productSku: 'HERB-001',
+        quantity: 2,
+        price: 350000,
+        subtotal: 700000,
+      },
+      {
+        productId: '1',
+        productName: 'Fertilizante Orgánico Premium',
+        productSku: 'FERT-001',
+        quantity: 5,
+        price: 179000,
+        subtotal: 895000,
+      }
+    ],
+    total: 1595000,
+    userId: '1',
+    userName: 'Admin Usuario',
+  },
+  {
+    id: '2',
+    date: '2025-04-14T11:30:00',
+    customer: 'Cooperativa Agrícola',
+    items: [
+      {
+        productId: '2',
+        productName: 'Semillas de Tomate Híbrido',
+        productSku: 'SEM-001',
+        quantity: 15,
+        price: 49000,
+        subtotal: 735000,
+      }
+    ],
+    total: 735000,
+    userId: '2',
+    userName: 'Empleado Ejemplo',
+  },
+];
+
+export const mockCurrentUser = {
+  id: '1',
+  name: 'Admin Usuario',
+  email: 'admin@agroinventario.com',
+  role: 'admin',
+};
