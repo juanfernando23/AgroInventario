@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 
 interface StatCardProps {
   title: string;
@@ -9,6 +9,7 @@ interface StatCardProps {
     isPositive: boolean;
   };
   color?: 'default' | 'green' | 'blue' | 'orange' | 'red';
+  delay?: number; // Delay for staggered animation
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -16,8 +17,19 @@ const StatCard: React.FC<StatCardProps> = ({
   value,
   icon,
   trend,
-  color = 'default'
+  color = 'default',
+  delay = 0
 }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, delay);
+    
+    return () => clearTimeout(timer);
+  }, [delay]);
+
   const colorClasses = {
     default: {
       bg: 'bg-white',
@@ -49,7 +61,13 @@ const StatCard: React.FC<StatCardProps> = ({
   const classes = colorClasses[color];
 
   return (
-    <div className={`${classes.bg} rounded-lg shadow p-4 sm:p-6 transition-transform duration-300 hover:shadow-md hover:-translate-y-1`}>
+    <div 
+      className={`${classes.bg} rounded-lg shadow p-4 sm:p-6 transition-all duration-500 hover:shadow-md hover:-translate-y-1 ${
+        isVisible 
+          ? 'opacity-100 transform translate-y-0' 
+          : 'opacity-0 transform translate-y-4'
+      }`}
+    >
       <div className="flex justify-between items-start">
         <div>
           <p className="text-sm font-medium text-gray-500">{title}</p>
@@ -67,7 +85,7 @@ const StatCard: React.FC<StatCardProps> = ({
           )}
         </div>
         
-        <div className={`${classes.iconBg} ${classes.iconText} p-2 sm:p-3 rounded-full`}>
+        <div className={`${classes.iconBg} ${classes.iconText} p-2 sm:p-3 rounded-full transform transition-transform duration-300 hover:scale-110`}>
           {icon}
         </div>
       </div>

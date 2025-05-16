@@ -70,34 +70,38 @@ const DashboardPage: React.FC = () => {
             value={totalProducts}
             icon={<Package2 className="h-6 w-6" />}
             color="blue"
+            delay={100}
           />
           <StatCard 
             title="Valor Total del Inventario"
             value={`$${totalInventoryValue}`}
             icon={<DollarSign className="h-6 w-6" />}
             color="green"
+            delay={200}
           />
           <StatCard 
             title="Productos con Stock Bajo"
             value={lowStockProducts}
             icon={<AlertTriangle className="h-6 w-6" />}
             color={lowStockProducts > 0 ? "red" : "green"}
+            delay={300}
           />
           <StatCard 
             title="Movimientos de Hoy"
             value={todayMovements}
             icon={<ArrowRightLeft className="h-6 w-6" />}
             color="orange"
+            delay={400}
           />
         </div>
         
         {/* Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Recent Products */}
-          <RecentList title="Productos Agregados Recientemente">
+          <RecentList title="Productos Agregados Recientemente" delay={500}>
             <div className="divide-y divide-gray-200">
               {recentProducts.map(product => (
-                <div key={product.id} className="px-6 py-4 flex items-center">
+                <div key={product.id} className="px-6 py-4 flex items-center hover:bg-gray-50 transition-colors duration-200">
                   <div className="flex-shrink-0 h-12 w-12 rounded bg-gray-200 overflow-hidden">
                     {product.imageUrl ? (
                       <img 
@@ -124,10 +128,10 @@ const DashboardPage: React.FC = () => {
           </RecentList>
           
           {/* Recent Movements */}
-          <RecentList title="Últimos Movimientos Registrados">
+          <RecentList title="Últimos Movimientos Registrados" delay={600}>
             <div className="divide-y divide-gray-200">
               {recentMovements.map(movement => (
-                <div key={movement.id} className="px-6 py-4">
+                <div key={movement.id} className="px-6 py-4 hover:bg-gray-50 transition-colors duration-200">
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="font-medium text-gray-900">{movement.productName}</div>
