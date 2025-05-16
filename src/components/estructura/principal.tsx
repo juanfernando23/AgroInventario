@@ -27,24 +27,28 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         />
         <button 
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 rounded-md text-[#255466] hover:bg-gray-100 focus:outline-none"
+          className="p-2 rounded-md text-[#255466] hover:bg-gray-100 focus:outline-none transition-colors duration-200"
         >
           <Menu className="h-6 w-6" />
         </button>
       </div>
       
       {/* Sidebar - visible en móviles solo cuando está abierto */}
-      <div className={`
-        md:w-64 md:flex-shrink-0 
-        ${sidebarOpen ? 'fixed inset-0 z-40 md:relative md:inset-auto' : 'hidden md:block'}
-      `}>
+      <div 
+        className={`
+          md:w-64 md:flex-shrink-0 transition-all duration-300 ease-in-out
+          ${sidebarOpen 
+            ? 'fixed inset-0 z-40 md:relative md:inset-auto animate-slide-in-right md:animate-none' 
+            : 'hidden md:block'}
+        `}
+      >
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
       
       {/* Overlay para cerrar el sidebar en móviles */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 z-30 bg-black bg-opacity-50 md:hidden"
+          className="fixed inset-0 z-30 bg-black bg-opacity-50 md:hidden animate-fade-in"
           onClick={() => setSidebarOpen(false)}
         ></div>
       )}
@@ -59,3 +63,4 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 };
 
 export default MainLayout;
+
