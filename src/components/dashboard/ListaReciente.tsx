@@ -20,7 +20,7 @@ const RecentList: React.FC<RecentItemProps> = ({
         {viewAllLink && (
           <a 
             href={viewAllLink} 
-            className="text-sm font-medium text-green-600 hover:text-green-700"
+            className="text-sm font-medium text-[#4b7480] hover:text-[#3a5a64]"
           >
             {viewAllText}
           </a>

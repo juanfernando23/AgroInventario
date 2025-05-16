@@ -85,40 +85,43 @@ const ProductForm: React.FC<ProductFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex flex-col gap-y-5">
-        {/* SKU */}
-        <div className="w-full">
-          <label htmlFor="sku" className="block text-sm font-medium text-gray-700 text-left mb-2">
-            SKU
-          </label>
-          <div>
-            <input
-              type="text"
-              name="sku"
-              id="sku"
-              required
-              value={formData.sku}
-              onChange={handleInputChange}
-              disabled={!!product}
-              className="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md disabled:bg-gray-100 bg-white p-3 h-10"
-            />
+        {/* SKU y Nombre en fila para escritorio, columna para móvil */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* SKU */}
+          <div className="w-full">
+            <label htmlFor="sku" className="block text-sm font-medium text-gray-700 text-left mb-2">
+              SKU
+            </label>
+            <div>
+              <input
+                type="text"
+                name="sku"
+                id="sku"
+                required
+                value={formData.sku}
+                onChange={handleInputChange}
+                disabled={!!product}
+                className="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md disabled:bg-gray-100 bg-white p-3 h-10"
+              />
+            </div>
           </div>
-        </div>
 
-        {/* Name */}
-        <div className="w-full">
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 text-left mb-2">
-            Nombre
-          </label>
-          <div>
-            <input
-              type="text"
-              name="name"
-              id="name"
-              required
-              value={formData.name}
-              onChange={handleInputChange}
-              className="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
-            />
+          {/* Name */}
+          <div className="w-full">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 text-left mb-2">
+              Nombre
+            </label>
+            <div>
+              <input
+                type="text"
+                name="name"
+                id="name"
+                required
+                value={formData.name}
+                onChange={handleInputChange}
+                className="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
+              />
+            </div>
           </div>
         </div>
 
@@ -165,30 +168,31 @@ const ProductForm: React.FC<ProductFormProps> = ({
           </div>
         </div>
 
-        {/* Price */}
-        <div className="w-full">
-          <label htmlFor="price" className="block text-sm font-medium text-gray-700 text-left mb-2">
-            Precio Unit.
-          </label>
-          <div className="relative rounded-md shadow-sm">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <span className="text-gray-500 sm:text-sm">$</span>
+        {/* Price, Unit y Min Stock en fila para escritorio, columna para móvil */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Price */}
+          <div className="w-full">
+            <label htmlFor="price" className="block text-sm font-medium text-gray-700 text-left mb-2">
+              Precio Unit.
+            </label>
+            <div className="relative rounded-md shadow-sm">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span className="text-gray-500 sm:text-sm">$</span>
+              </div>
+              <input
+                type="number"
+                name="price"
+                id="price"
+                min="0"
+                step="0.01"
+                required
+                value={formData.price}
+                onChange={handleInputChange}
+                className="focus:ring-green-500 focus:border-green-500 block w-full pl-7 pr-12 sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
+              />
             </div>
-            <input
-              type="number"
-              name="price"
-              id="price"
-              min="0"
-              step="0.01"
-              required
-              value={formData.price}
-              onChange={handleInputChange}
-              className="focus:ring-green-500 focus:border-green-500 block w-full pl-7 pr-12 sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
-            />
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Unit */}
           <div className="w-full">
             <label htmlFor="unit" className="block text-sm font-medium text-gray-700 text-left mb-2">
@@ -303,13 +307,13 @@ const ProductForm: React.FC<ProductFormProps> = ({
         <button
           type="button"
           onClick={onCancel}
-          className="py-2 px-6 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          className="py-2 px-6 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466]"
         >
           Cancelar
         </button>
         <button
           type="submit"
-          className="py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          className="py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#255466] hover:bg-[#1d4050] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466]"
         >
           {product ? 'Guardar Cambios' : 'Crear Producto'}
         </button>

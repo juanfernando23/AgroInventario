@@ -26,8 +26,8 @@ const StatCard: React.FC<StatCardProps> = ({
     },
     green: {
       bg: 'bg-white',
-      iconBg: 'bg-green-100',
-      iconText: 'text-green-600'
+      iconBg: 'bg-[#edf2f4]',
+      iconText: 'text-[#4b7480]'
     },
     blue: {
       bg: 'bg-white',
@@ -49,25 +49,25 @@ const StatCard: React.FC<StatCardProps> = ({
   const classes = colorClasses[color];
 
   return (
-    <div className={`${classes.bg} rounded-lg shadow p-6 transition-transform duration-300 hover:shadow-md hover:-translate-y-1`}>
+    <div className={`${classes.bg} rounded-lg shadow p-4 sm:p-6 transition-transform duration-300 hover:shadow-md hover:-translate-y-1`}>
       <div className="flex justify-between items-start">
         <div>
           <p className="text-sm font-medium text-gray-500">{title}</p>
-          <p className="mt-2 text-3xl font-semibold text-gray-900">{value}</p>
+          <p className="mt-2 text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900">{value}</p>
           
           {trend && (
             <div className="mt-2 flex items-center">
-              <div className={`mr-2 flex items-center text-sm ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
+              <div className={`mr-2 flex items-center text-xs sm:text-sm ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
                 <span>
                   {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}%
                 </span>
               </div>
-              <span className="text-sm text-gray-500">vs. mes anterior</span>
+              <span className="text-xs sm:text-sm text-gray-500">vs. mes anterior</span>
             </div>
           )}
         </div>
         
-        <div className={`${classes.iconBg} ${classes.iconText} p-3 rounded-full`}>
+        <div className={`${classes.iconBg} ${classes.iconText} p-2 sm:p-3 rounded-full`}>
           {icon}
         </div>
       </div>

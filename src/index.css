@@ -1,3 +1,44 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Estilos responsive globales */
+html {
+  font-size: 16px;
+}
+
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Mejoras para formularios en dispositivos móviles */
+input, select, textarea {
+  font-size: 16px !important; /* Evita zoom en campos de entrada en iOS */
+}
+
+/* Mejoras para tablas responsivas */
+@layer components {
+  .table-responsive {
+    @apply w-full overflow-x-auto -mx-4 px-4;
+  }
+}
+
+/* Mejoras para modales en dispositivos móviles */
+.modal-mobile-friendly {
+  @apply max-h-[90vh] overflow-y-auto;
+}
+
+/* Mejora el contraste en dispositivos móviles */
+@media (max-width: 640px) {
+  .text-gray-500 {
+    @apply text-gray-600;
+  }
+}

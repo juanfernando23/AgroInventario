@@ -60,7 +60,7 @@ const SalesPage: React.FC = () => {
               onClick={() => setView('form')}
               className={`flex items-center px-4 py-2 border rounded-md ${
                 view === 'form'
-                  ? 'bg-green-600 text-white border-transparent'
+                  ? 'bg-[#255466] text-white border-transparent'
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               } transition-colors duration-200`}
             >
@@ -72,7 +72,7 @@ const SalesPage: React.FC = () => {
               onClick={() => setView('history')}
               className={`flex items-center px-4 py-2 border rounded-md ${
                 view === 'history'
-                  ? 'bg-green-600 text-white border-transparent'
+                  ? 'bg-[#255466] text-white border-transparent'
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
               } transition-colors duration-200`}
             >

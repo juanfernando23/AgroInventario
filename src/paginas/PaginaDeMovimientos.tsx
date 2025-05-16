@@ -50,7 +50,7 @@ const MovementsPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowMovementForm(true)}
-            className="flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+            className="flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#255466] hover:bg-[#1d4050] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466] transition-colors duration-200"
           >
             <Plus className="h-5 w-5 mr-2" />
             Registrar Movimiento Manual
