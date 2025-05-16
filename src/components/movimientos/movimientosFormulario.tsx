@@ -202,18 +202,17 @@ const MovementForm: React.FC<MovementFormProps> = ({
           </div>
         </div>
       </div>
-      
-      <div className="flex justify-end space-x-3 mt-6">
+        <div className="flex justify-end space-x-3 mt-6">
         <button
           type="button"
           onClick={onCancel}
-          className="py-2 px-6 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          className="py-2 px-6 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466]"
         >
           Cancelar
         </button>
         <button
           type="submit"
-          className="py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          className="py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#255466] hover:bg-[#1d4050] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466]"
         >
           Registrar Movimiento
         </button>

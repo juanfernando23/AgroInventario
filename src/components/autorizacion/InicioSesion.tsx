@@ -19,20 +19,19 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-8 px-4 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <img
             src="/logo.png"
             alt="Logo"
-            style={{ height: '220px', width: 'auto' }} // Usando un tamaño específico en píxeles
-            className="object-contain"
+            className="h-32 sm:h-40 md:h-[220px] w-auto object-contain"
           />
         </div>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <div className="mt-6 sm:mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-6 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-red-50 border-l-4 border-red-500 p-4">
@@ -82,7 +81,7 @@ const LoginForm: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex w-full justify-center rounded-md border border-transparent bg-green-600 py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200 ease-in-out disabled:opacity-70 h-10"
+                className="flex w-full justify-center rounded-md border border-transparent bg-[#255466] py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-[#1d4050] focus:outline-none focus:ring-2 focus:ring-[#255466] focus:ring-offset-2 transition-colors duration-200 ease-in-out disabled:opacity-70 h-10"
               >
                 {isLoading ? 'Accediendo...' : 'Acceder'}
               </button>

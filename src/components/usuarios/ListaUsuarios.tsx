@@ -70,7 +70,7 @@ const UsersList: React.FC<UsersListProps> = ({
         <button
           type="button"
           onClick={handleAddClick}
-          className="flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+          className="flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#255466] hover:bg-[#1d4050] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466] transition-colors duration-200"
         >
           <Plus className="h-5 w-5 mr-2" />
           Nuevo Usuario
@@ -182,14 +182,14 @@ const UsersList: React.FC<UsersListProps> = ({
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466]"
               onClick={() => setShowDeleteConfirm(false)}
             >
               Cancelar
             </button>
             <button
               type="button"
-              className="px-4 py-2 bg-red-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className="px-4 py-2 bg-[#255466] border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-[#1d4050] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466]"
               onClick={handleConfirmDelete}
             >
               Confirmar Eliminación

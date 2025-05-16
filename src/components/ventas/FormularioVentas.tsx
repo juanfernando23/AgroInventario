@@ -292,7 +292,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
               <button
                 type="button"
                 onClick={handleCancelSale}
-                className="px-6 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 h-10"
+                className="px-6 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466] h-10"
               >
                 Cancelar Venta
               </button>
@@ -300,7 +300,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
                 type="button"
                 onClick={handleConfirmSale}
                 disabled={cartItems.length === 0}
-                className="px-6 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 h-10"
+                className="px-6 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-[#255466] hover:bg-[#1d4050] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466] disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 h-10"
               >
                 Confirmar Venta
               </button>

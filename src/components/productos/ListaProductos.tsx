@@ -77,7 +77,7 @@ const ProductList: React.FC<ProductListProps> = ({
         <button
           type="button"
           onClick={handleAddClick}
-          className="flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+          className="flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#255466] hover:bg-[#1d4050] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466] transition-colors duration-200"
         >
           <Plus className="h-5 w-5 mr-2" />
           Nuevo Producto
@@ -85,7 +85,8 @@ const ProductList: React.FC<ProductListProps> = ({
       </div>
 
       <div className="mt-4 bg-white shadow overflow-hidden rounded-lg">
-        <div className="overflow-x-auto">
+        {/* Vista de tabla para pantallas medianas y grandes */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -175,6 +176,76 @@ const ProductList: React.FC<ProductListProps> = ({
             </tbody>
           </table>
         </div>
+        
+        {/* Vista de tarjetas para dispositivos móviles */}
+        <div className="md:hidden">
+          {filteredProducts.length === 0 ? (
+            <div className="text-center py-4 text-gray-500">
+              No se encontraron productos.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 p-4">
+              {filteredProducts.map((product) => (
+                <div key={product.id} className="bg-white border rounded-lg shadow-sm p-4">
+                  <div className="flex items-center mb-3">
+                    <div className="h-12 w-12 rounded bg-gray-200 overflow-hidden">
+                      {product.imageUrl ? (
+                        <img 
+                          src={product.imageUrl} 
+                          alt={product.name} 
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-gray-200" />
+                      )}
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <div className="font-medium text-gray-900">{product.name}</div>
+                      <div className="text-sm text-gray-500">{product.category}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
+                    <div>
+                      <div className="text-gray-500">SKU</div>
+                      <div>{product.sku}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-500">Precio</div>
+                      <div>${product.price.toFixed(2)}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-500">Stock</div>
+                      <div className={product.stock <= product.minStock ? 'text-red-600 font-medium' : ''}>
+                        {product.stock} {product.unit}
+                        {product.stock <= product.minStock && (
+                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            ¡Bajo!
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end gap-2 border-t pt-3">
+                    <button
+                      onClick={() => handleEditClick(product)}
+                      className="p-1.5 rounded-full text-blue-600 hover:bg-blue-50"
+                    >
+                      <Edit className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteClick(product)}
+                      className="p-1.5 rounded-full text-red-600 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Product Form Modal */}
@@ -209,14 +280,14 @@ const ProductList: React.FC<ProductListProps> = ({
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466]"
               onClick={() => setShowDeleteConfirm(false)}
             >
               Cancelar
             </button>
             <button
               type="button"
-              className="px-4 py-2 bg-red-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className="px-4 py-2 bg-[#255466] border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-[#1d4050] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466]"
               onClick={handleConfirmDelete}
             >
               Confirmar Eliminación

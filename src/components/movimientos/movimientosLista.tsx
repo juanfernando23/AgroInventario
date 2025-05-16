@@ -51,7 +51,7 @@ const MovementsList: React.FC<MovementsListProps> = ({ movements }) => {
 
   const getMovementTypeClass = (type: string) => {
     switch(type) {
-      case 'entrada': return 'bg-green-100 text-green-800';
+      case 'entrada': return 'bg-[#edf2f4] text-[#4b7480]';
       case 'salida': return 'bg-blue-100 text-blue-800';
       case 'venta': return 'bg-purple-100 text-purple-800';
       case 'ajuste': return 'bg-orange-100 text-orange-800';
@@ -74,7 +74,7 @@ const MovementsList: React.FC<MovementsListProps> = ({ movements }) => {
               type="text"
               value={filters.product}
               onChange={handleFilterChange}
-              className="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md"
+              className="shadow-sm focus:ring-[#4b7480] focus:border-[#4b7480] block w-full sm:text-sm border-gray-300 rounded-md"
             />
           </div>
           
@@ -87,7 +87,7 @@ const MovementsList: React.FC<MovementsListProps> = ({ movements }) => {
               name="type"
               value={filters.type}
               onChange={handleFilterChange}
-              className="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md"
+              className="shadow-sm focus:ring-[#4b7480] focus:border-[#4b7480] block w-full sm:text-sm border-gray-300 rounded-md"
             >
               <option value="">Todos</option>
               <option value="entrada">Entrada</option>
@@ -107,7 +107,7 @@ const MovementsList: React.FC<MovementsListProps> = ({ movements }) => {
               type="date"
               value={filters.dateFrom}
               onChange={handleFilterChange}
-              className="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md"
+              className="shadow-sm focus:ring-[#4b7480] focus:border-[#4b7480] block w-full sm:text-sm border-gray-300 rounded-md"
             />
           </div>
           
@@ -121,7 +121,7 @@ const MovementsList: React.FC<MovementsListProps> = ({ movements }) => {
               type="date"
               value={filters.dateTo}
               onChange={handleFilterChange}
-              className="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md"
+              className="shadow-sm focus:ring-[#4b7480] focus:border-[#4b7480] block w-full sm:text-sm border-gray-300 rounded-md"
             />
           </div>
         </div>
@@ -178,7 +178,7 @@ const MovementsList: React.FC<MovementsListProps> = ({ movements }) => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`text-sm font-medium ${
-                        movement.quantity < 0 ? 'text-red-600' : 'text-green-600'
+                        movement.quantity < 0 ? 'text-red-600' : 'text-[#4b7480]'
                       }`}>
                         {movement.quantity > 0 ? '+' : ''}{movement.quantity}
                       </span>
