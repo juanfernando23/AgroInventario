@@ -91,18 +91,38 @@ export const useProductService = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Buscar productos
+  };  // Buscar productos
   const searchProducts = async (term: string) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/search/${encodeURIComponent(term)}`);
-      if (!res.ok) throw new Error('No se pudo buscar productos');
-      const data = await res.json();
-      setProducts(data);
-      return data;
+      // Si el término de búsqueda está vacío, cargar todos los productos
+      if (!term.trim()) {
+        return await loadProducts();
+      }
+      
+      try {
+        const res = await fetch(`${API_URL}/search/${encodeURIComponent(term)}`);
+        if (!res.ok) throw new Error('No se pudo buscar productos');
+        const data = await res.json();
+        setProducts(data);
+        return data;
+      } catch (fetchError) {
+        console.warn('Error al buscar productos en API, utilizando búsqueda local:', fetchError);
+        // Realizar búsqueda local si la API falla
+        // Cargar todos los productos primero si es necesario
+        if (products.length === 0) {
+          await loadProducts();
+        }
+        // Filtrar los productos localmente
+        const filteredProducts = products.filter(p => 
+          p.name.toLowerCase().includes(term.toLowerCase()) || 
+          p.sku.toLowerCase().includes(term.toLowerCase()) || 
+          p.category.toLowerCase().includes(term.toLowerCase())
+        );
+        setProducts(filteredProducts);
+        return filteredProducts;
+      }
     } catch (err: any) {
       setError('Error al buscar productos: ' + (err.message || 'Error desconocido'));
       throw err;
