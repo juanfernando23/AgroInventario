@@ -57,10 +57,14 @@ const ProductList: React.FC<ProductListProps> = ({
       setShowDeleteConfirm(false);
     }
   };
-
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const term = e.target.value;
-    onSearch(term);
+    try {
+      onSearch(term);
+    } catch (error) {
+      console.error("Error al realizar la búsqueda:", error);
+      // El error será manejado por el componente padre
+    }
   };
 
   return (

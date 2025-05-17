@@ -48,10 +48,14 @@ const ProductsPage: React.FC = () => {
       showNotification('error', `Error al eliminar producto: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
   };
-  
-  const handleSearch = (term: string) => {
+    const handleSearch = (term: string) => {
     setSearchTerm(term);
-    searchProducts(term);
+    try {
+      searchProducts(term);
+    } catch (error) {
+      console.error('Error al buscar productos:', error);
+      showNotification('error', `Error al buscar productos: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+    }
   };
   return (
     <MainLayout>
