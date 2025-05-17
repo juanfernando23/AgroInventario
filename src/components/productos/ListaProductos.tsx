@@ -3,7 +3,6 @@ import { Edit, Trash2, Search, Plus, AlertTriangle, Loader } from 'lucide-react'
 import { Product } from '../../types';
 import ProductForm from './FormularioProductos';
 import Modal from '../comun/Modal';
-import AnimatedItem from '../comun/AnimatedItem';
 
 interface ProductListProps {
   products: Product[];
@@ -91,9 +90,7 @@ const ProductList: React.FC<ProductListProps> = ({
 
       {loading ? (
         <div className="flex justify-center items-center p-12">
-          <AnimatedItem type="scale">
-            <Loader className="h-12 w-12 text-[#255466] animate-spin" />
-          </AnimatedItem>
+          <Loader className="h-12 w-12 text-[#255466] animate-spin" />
         </div>
       ) : (
         <div className="mt-4 bg-white shadow overflow-hidden rounded-lg">
@@ -114,7 +111,7 @@ const ProductList: React.FC<ProductListProps> = ({
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Precio
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
@@ -136,60 +133,67 @@ const ProductList: React.FC<ProductListProps> = ({
                     </td>
                   </tr>
                 ) : (
-                  products.map((product, index) => (
-                    <AnimatedItem 
+                  products.map((product) => (
+                    <tr 
                       key={product.id} 
-                      delay={index * 50} 
-                      direction="right"
+                      className="hover:bg-gray-50 transition-colors duration-150"
                     >
-                      <tr className="hover:bg-gray-50 transition-colors duration-150">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10">
-                              {product.imageUrl ? (
-                                <img className="h-10 w-10 rounded-full object-cover" src={product.imageUrl} alt={product.name} />
-                              ) : (
-                                <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-500">
-                                  {product.name.charAt(0).toUpperCase()}
-                                </div>
-                              )}
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                              <div className="text-sm text-gray-500">{product.description.length > 50 ? product.description.substring(0, 50) + '...' : product.description}</div>
-                            </div>
+                      {/* Columna Producto */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0 h-10 w-10">
+                            {product.imageUrl ? (
+                              <img className="h-10 w-10 rounded-full object-cover" src={product.imageUrl} alt={product.name} />
+                            ) : (
+                              <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-500">
+                                {product.name.charAt(0).toUpperCase()}
+                              </div>
+                            )}
                           </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{product.sku}</div>
-                          <div className="text-sm text-gray-500">{product.category}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className={`text-sm ${product.stock <= product.minStock ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
-                            {product.stock} {product.unit}
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                            <div className="text-sm text-gray-500 truncate max-w-xs">{product.description}</div>
                           </div>
-                          {product.stock <= product.minStock && (
-                            <div className="text-xs text-red-500">Stock bajo</div>
-                          )}
-                        </td>                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          ${typeof product.price === 'number' ? product.price.toFixed(2) : parseFloat(String(product.price)).toFixed(2)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button 
-                            onClick={() => handleEditClick(product)}
-                            className="text-indigo-600 hover:text-indigo-900 mr-3 transition-colors duration-150"
-                          >
-                            <Edit className="h-5 w-5" />
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteClick(product)}
-                            className="text-red-600 hover:text-red-900 transition-colors duration-150"
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </button>
-                        </td>
-                      </tr>
-                    </AnimatedItem>
+                        </div>
+                      </td>
+                      
+                      {/* Columna SKU / Categoría */}
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">{product.sku}</div>
+                        <div className="text-sm text-gray-500">{product.category}</div>
+                      </td>
+                      
+                      {/* Columna Stock */}
+                      <td className="px-6 py-4">
+                        <div className={`text-sm ${product.stock <= product.minStock ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
+                          {product.stock} {product.unit}
+                        </div>
+                        {product.stock <= product.minStock && (
+                          <div className="text-xs text-red-500">Stock bajo</div>
+                        )}
+                      </td>
+                      
+                      {/* Columna Precio */}
+                      <td className="px-6 py-4 text-sm text-gray-500">
+                        ${typeof product.price === 'number' ? product.price.toFixed(2) : parseFloat(String(product.price)).toFixed(2)}
+                      </td>
+                      
+                      {/* Columna Acciones */}
+                      <td className="px-6 py-4 text-center">
+                        <button 
+                          onClick={() => handleEditClick(product)}
+                          className="text-indigo-600 hover:text-indigo-900 mr-3 transition-colors duration-150"
+                        >
+                          <Edit className="h-5 w-5" />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteClick(product)}
+                          className="text-red-600 hover:text-red-900 transition-colors duration-150"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </td>
+                    </tr>
                   ))
                 )}
               </tbody>
@@ -213,66 +217,63 @@ const ProductList: React.FC<ProductListProps> = ({
               </div>
             ) : (
               <ul className="divide-y divide-gray-200">
-                {products.map((product, index) => (
-                  <AnimatedItem 
-                    key={product.id} 
-                    delay={index * 50} 
-                    direction="up"
-                  >
-                    <li className="p-4">
-                      <div className="flex justify-between">
-                        <div className="flex items-center">
-                          {product.imageUrl ? (
-                            <img className="h-10 w-10 rounded-full object-cover" src={product.imageUrl} alt={product.name} />
-                          ) : (
-                            <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-500">
-                              {product.name.charAt(0).toUpperCase()}
-                            </div>
-                          )}
-                          <div className="ml-3">
-                            <p className="text-sm font-medium text-gray-900">{product.name}</p>
-                            <p className="text-sm text-gray-500">{product.sku}</p>
+                {products.map((product) => (
+                  <li key={product.id} className="p-4">
+                    <div className="flex justify-between">
+                      <div className="flex items-center">
+                        {product.imageUrl ? (
+                          <img className="h-10 w-10 rounded-full object-cover" src={product.imageUrl} alt={product.name} />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-500">
+                            {product.name.charAt(0).toUpperCase()}
                           </div>
-                        </div>
-                        <div className="flex items-center">
-                          <button 
-                            onClick={() => handleEditClick(product)}
-                            className="text-indigo-600 hover:text-indigo-900 mr-3 p-1"
-                          >
-                            <Edit className="h-5 w-5" />
-                          </button>
-                          <button 
-                            onClick={() => handleDeleteClick(product)}
-                            className="text-red-600 hover:text-red-900 p-1"
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </button>
+                        )}
+                        <div className="ml-3">
+                          <p className="text-sm font-medium text-gray-900">{product.name}</p>
+                          <p className="text-sm text-gray-500">{product.sku}</p>
                         </div>
                       </div>
-                      <div className="mt-2 grid grid-cols-2 gap-1">
-                        <div>
-                          <p className="text-xs text-gray-500">Categoría</p>
-                          <p className="text-sm">{product.category}</p>
-                        </div>                        <div>
-                          <p className="text-xs text-gray-500">Precio</p>
-                          <p className="text-sm">${typeof product.price === 'number' ? product.price.toFixed(2) : parseFloat(String(product.price)).toFixed(2)}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Stock</p>
-                          <p className={`text-sm ${product.stock <= product.minStock ? 'text-red-600 font-medium' : ''}`}>
-                            {product.stock} {product.unit}
-                            {product.stock <= product.minStock && ' (Stock bajo)'}
-                          </p>
-                        </div>
+                      <div className="flex items-center">
+                        <button 
+                          onClick={() => handleEditClick(product)}
+                          className="text-indigo-600 hover:text-indigo-900 mr-3 p-1"
+                        >
+                          <Edit className="h-5 w-5" />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteClick(product)}
+                          className="text-red-600 hover:text-red-900 p-1"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
                       </div>
-                    </li>
-                  </AnimatedItem>
+                    </div>
+                    <div className="mt-2 grid grid-cols-3 gap-2">
+                      <div>
+                        <p className="text-xs text-gray-500">Categoría</p>
+                        <p className="text-sm">{product.category}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Precio</p>
+                        <p className="text-sm">${typeof product.price === 'number' ? product.price.toFixed(2) : parseFloat(String(product.price)).toFixed(2)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Stock</p>
+                        <p className={`text-sm ${product.stock <= product.minStock ? 'text-red-600 font-medium' : ''}`}>
+                          {product.stock} {product.unit}
+                          {product.stock <= product.minStock && ' (Stock bajo)'}
+                        </p>
+                      </div>
+                    </div>
+                  </li>
                 ))}
               </ul>
             )}
           </div>
         </div>
-      )}      <Modal 
+      )}
+
+      <Modal 
         isOpen={showProductForm} 
         onClose={() => setShowProductForm(false)}
         title={selectedProduct ? `Editar producto: ${selectedProduct.name}` : "Agregar nuevo producto"}
