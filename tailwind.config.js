@@ -2,8 +2,7 @@
 export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {
-      keyframes: {
+    extend: {      keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
@@ -28,6 +27,14 @@ export default {
           '0%': { transform: 'translateX(0)', opacity: '1' },
           '100%': { transform: 'translateX(100%)', opacity: '0' },
         },
+      },
+      animation: {
+        fadeIn: 'fadeIn 0.3s ease-out forwards',
+        fadeOut: 'fadeOut 0.3s ease-in forwards',
+        scaleIn: 'scaleIn 0.3s ease-out forwards',
+        scaleOut: 'scaleOut 0.3s ease-in forwards',
+        slideInRight: 'slideInRight 0.3s ease-out forwards',
+        slideOutRight: 'slideOutRight 0.3s ease-in forwards',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out forwards',

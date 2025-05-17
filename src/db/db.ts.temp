@@ -1,0 +1,97 @@
+// Configuración de la conexión a la base de datos PostgreSQL
+import dotenv from 'dotenv';
+
+// Cargar variables de entorno desde el archivo .env
+dotenv.config();
+
+// Verificar si estamos en un entorno de navegador
+const isBrowser = typeof window !== 'undefined';
+
+// Interfaz para consultas simuladas
+interface MockQueryResult {
+  rows: any[];
+  rowCount: number | null;
+}
+
+// Simulamos las operaciones de base de datos para el cliente
+export const query = async (text: string, params: any[] = []): Promise<MockQueryResult> => {
+  if (isBrowser) {
+    console.log('Simulando consulta en el navegador:', text);
+    return { rows: [], rowCount: 0 };
+  }
+
+  // Si no está en el navegador, importa pg y hace la consulta real
+  try {
+    // Solo importamos pg en el servidor
+    const { Pool } = !isBrowser ? require('pg') : { Pool: null };
+    
+    if (!Pool) {
+      throw new Error('No se puede acceder a la base de datos desde el navegador');
+    }
+    
+    // Configuración de la conexión a la base de datos
+    const dbConfig = {
+      host: process.env.PGHOST,
+      database: process.env.PGDATABASE,
+      user: process.env.PGUSER,
+      password: process.env.PGPASSWORD,
+      port: parseInt(process.env.PGPORT || '5432'),
+      ssl: process.env.PGSSLMODE === 'require' ? { rejectUnauthorized: false } : false
+    };
+
+    const pool = new Pool(dbConfig);
+    const result = await pool.query(text, params);
+    return result;
+  } catch (error) {
+    console.error('Error al ejecutar consulta:', error);
+    throw error;
+  }
+};
+
+// Función auxiliar para simular la obtención de un cliente (solo para mantener compatibilidad)
+export const getClient = async () => {
+  // Simular un cliente en el navegador
+  if (isBrowser) {
+    console.log('Simulando cliente en el navegador');
+    return {
+      query: async () => ({ rows: [], rowCount: 0 }),
+      release: () => {}
+    };
+  }
+  
+  // En el servidor, obtener un cliente real
+  try {
+    const { Pool } = require('pg');
+    const dbConfig = {
+      host: process.env.PGHOST,
+      database: process.env.PGDATABASE,
+      user: process.env.PGUSER,
+      password: process.env.PGPASSWORD,
+      port: parseInt(process.env.PGPORT || '5432'),
+      ssl: process.env.PGSSLMODE === 'require' ? { rejectUnauthorized: false } : false
+    };
+    
+    const pool = new Pool(dbConfig);
+    const client = await pool.connect();
+    const originalRelease = client.release;
+    
+    // Sobrescribir el método release para agregar registro
+    client.release = () => {
+      console.log('Cliente devuelto al pool');
+      return originalRelease.apply(client);
+    };
+    
+    return client;
+  } catch (error) {
+    console.error('Error al obtener cliente:', error);
+    return {
+      query: async () => ({ rows: [], rowCount: 0 }),
+      release: () => {}
+    };
+  }
+};
+
+export default {
+  query,
+  getClient
+};
