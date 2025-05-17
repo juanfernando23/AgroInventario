@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { Edit, Trash2, Search, Plus } from 'lucide-react';
+import { Edit, Trash2, Search, Plus, AlertTriangle, Loader } from 'lucide-react';
 import { Product } from '../../types';
 import ProductForm from './FormularioProductos';
 import Modal from '../comun/Modal';
+import AnimatedItem from '../comun/AnimatedItem';
 
 interface ProductListProps {
   products: Product[];
+  loading: boolean;
+  searchTerm?: string;
+  onSearch: (term: string) => void;
   onAddProduct: (product: Omit<Product, 'id' | 'createdAt'>) => void;
   onEditProduct: (id: string, product: Partial<Product>) => void;
   onDeleteProduct: (id: string) => void;
@@ -13,20 +17,16 @@ interface ProductListProps {
 
 const ProductList: React.FC<ProductListProps> = ({
   products,
+  loading,
+  searchTerm = '',
+  onSearch,
   onAddProduct,
   onEditProduct,
   onDeleteProduct
 }) => {
-  const [searchTerm, setSearchTerm] = useState('');
   const [showProductForm, setShowProductForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-
-  const filteredProducts = products.filter(product => 
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleAddClick = () => {
     setSelectedProduct(null);
@@ -43,7 +43,7 @@ const ProductList: React.FC<ProductListProps> = ({
     setShowDeleteConfirm(true);
   };
 
-  const handleSaveProduct = (product: any) => {
+  const handleSaveProduct = (product: Omit<Product, 'id' | 'createdAt'>) => {
     if (selectedProduct) {
       onEditProduct(selectedProduct.id, product);
     } else {
@@ -59,6 +59,11 @@ const ProductList: React.FC<ProductListProps> = ({
     }
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const term = e.target.value;
+    onSearch(term);
+  };
+
   return (
     <div>
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -71,7 +76,7 @@ const ProductList: React.FC<ProductListProps> = ({
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
             placeholder="Buscar por nombre, SKU o categoría..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
           />
         </div>
         <button
@@ -84,213 +89,222 @@ const ProductList: React.FC<ProductListProps> = ({
         </button>
       </div>
 
-      <div className="mt-4 bg-white shadow overflow-hidden rounded-lg">
-        {/* Vista de tabla para pantallas medianas y grandes */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Producto
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  SKU / Categoría
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Precio
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredProducts.length === 0 ? (
+      {loading ? (
+        <div className="flex justify-center items-center p-12">
+          <AnimatedItem type="scale">
+            <Loader className="h-12 w-12 text-[#255466] animate-spin" />
+          </AnimatedItem>
+        </div>
+      ) : (
+        <div className="mt-4 bg-white shadow overflow-hidden rounded-lg">
+          {/* Vista de tabla para pantallas medianas y grandes */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
-                    No se encontraron productos.
-                  </td>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Producto
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    SKU / Categoría
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Stock
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Precio
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Acciones
+                  </th>
                 </tr>
-              ) : (
-                filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10 rounded bg-gray-200 overflow-hidden">
-                          {product.imageUrl ? (
-                            <img 
-                              src={product.imageUrl} 
-                              alt={product.name} 
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="h-full w-full bg-gray-200" />
-                          )}
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {products.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                      {searchTerm ? (
+                        <div className="flex flex-col items-center justify-center py-4">
+                          <AlertTriangle className="h-12 w-12 text-yellow-400 mb-2" />
+                          <p>No se encontraron productos que coincidan con "{searchTerm}".</p>
                         </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center py-4">
+                          <p>No hay productos disponibles. ¡Añade tu primer producto!</p>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{product.sku}</div>
-                      <div className="text-sm text-gray-500">{product.category}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex text-sm ${
-                        product.stock <= product.minStock 
-                          ? 'text-red-600 font-medium' 
-                          : 'text-gray-900'
-                      }`}>
-                        {product.stock} {product.unit}
-                      </span>
-                      {product.stock <= product.minStock && (
-                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                          ¡Stock Bajo!
-                        </span>
                       )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      ${product.price.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleEditClick(product)}
-                        className="text-blue-600 hover:text-blue-900 mr-4 transition-colors duration-200"
-                      >
-                        <Edit className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(product)}
-                        className="text-red-600 hover:text-red-900 transition-colors duration-200"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-        
-        {/* Vista de tarjetas para dispositivos móviles */}
-        <div className="md:hidden">
-          {filteredProducts.length === 0 ? (
-            <div className="text-center py-4 text-gray-500">
-              No se encontraron productos.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 p-4">
-              {filteredProducts.map((product) => (
-                <div key={product.id} className="bg-white border rounded-lg shadow-sm p-4">
-                  <div className="flex items-center mb-3">
-                    <div className="h-12 w-12 rounded bg-gray-200 overflow-hidden">
-                      {product.imageUrl ? (
-                        <img 
-                          src={product.imageUrl} 
-                          alt={product.name} 
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="h-full w-full bg-gray-200" />
-                      )}
-                    </div>
-                    <div className="ml-3 flex-1">
-                      <div className="font-medium text-gray-900">{product.name}</div>
-                      <div className="text-sm text-gray-500">{product.category}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
-                    <div>
-                      <div className="text-gray-500">SKU</div>
-                      <div>{product.sku}</div>
-                    </div>
-                    <div>
-                      <div className="text-gray-500">Precio</div>
-                      <div>${product.price.toFixed(2)}</div>
-                    </div>
-                    <div>
-                      <div className="text-gray-500">Stock</div>
-                      <div className={product.stock <= product.minStock ? 'text-red-600 font-medium' : ''}>
-                        {product.stock} {product.unit}
-                        {product.stock <= product.minStock && (
-                          <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                            ¡Bajo!
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-end gap-2 border-t pt-3">
-                    <button
-                      onClick={() => handleEditClick(product)}
-                      className="p-1.5 rounded-full text-blue-600 hover:bg-blue-50"
+                ) : (
+                  products.map((product, index) => (
+                    <AnimatedItem 
+                      key={product.id} 
+                      delay={index * 50} 
+                      direction="right"
                     >
-                      <Edit className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClick(product)}
-                      className="p-1.5 rounded-full text-red-600 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+                      <tr className="hover:bg-gray-50 transition-colors duration-150">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10">
+                              {product.imageUrl ? (
+                                <img className="h-10 w-10 rounded-full object-cover" src={product.imageUrl} alt={product.name} />
+                              ) : (
+                                <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-500">
+                                  {product.name.charAt(0).toUpperCase()}
+                                </div>
+                              )}
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                              <div className="text-sm text-gray-500">{product.description.length > 50 ? product.description.substring(0, 50) + '...' : product.description}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{product.sku}</div>
+                          <div className="text-sm text-gray-500">{product.category}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className={`text-sm ${product.stock <= product.minStock ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
+                            {product.stock} {product.unit}
+                          </div>
+                          {product.stock <= product.minStock && (
+                            <div className="text-xs text-red-500">Stock bajo</div>
+                          )}
+                        </td>                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          ${typeof product.price === 'number' ? product.price.toFixed(2) : parseFloat(String(product.price)).toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button 
+                            onClick={() => handleEditClick(product)}
+                            className="text-indigo-600 hover:text-indigo-900 mr-3 transition-colors duration-150"
+                          >
+                            <Edit className="h-5 w-5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteClick(product)}
+                            className="text-red-600 hover:text-red-900 transition-colors duration-150"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </td>
+                      </tr>
+                    </AnimatedItem>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
-      {/* Product Form Modal */}
-      <Modal
-        isOpen={showProductForm}
+          {/* Vista de tarjetas para dispositivos móviles */}
+          <div className="md:hidden">
+            {products.length === 0 ? (
+              <div className="p-6 text-center text-gray-500">
+                {searchTerm ? (
+                  <div className="flex flex-col items-center justify-center py-4">
+                    <AlertTriangle className="h-12 w-12 text-yellow-400 mb-2" />
+                    <p>No se encontraron productos que coincidan con "{searchTerm}".</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-4">
+                    <p>No hay productos disponibles. ¡Añade tu primer producto!</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <ul className="divide-y divide-gray-200">
+                {products.map((product, index) => (
+                  <AnimatedItem 
+                    key={product.id} 
+                    delay={index * 50} 
+                    direction="up"
+                  >
+                    <li className="p-4">
+                      <div className="flex justify-between">
+                        <div className="flex items-center">
+                          {product.imageUrl ? (
+                            <img className="h-10 w-10 rounded-full object-cover" src={product.imageUrl} alt={product.name} />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-500">
+                              {product.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                          <div className="ml-3">
+                            <p className="text-sm font-medium text-gray-900">{product.name}</p>
+                            <p className="text-sm text-gray-500">{product.sku}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center">
+                          <button 
+                            onClick={() => handleEditClick(product)}
+                            className="text-indigo-600 hover:text-indigo-900 mr-3 p-1"
+                          >
+                            <Edit className="h-5 w-5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteClick(product)}
+                            className="text-red-600 hover:text-red-900 p-1"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="mt-2 grid grid-cols-2 gap-1">
+                        <div>
+                          <p className="text-xs text-gray-500">Categoría</p>
+                          <p className="text-sm">{product.category}</p>
+                        </div>                        <div>
+                          <p className="text-xs text-gray-500">Precio</p>
+                          <p className="text-sm">${typeof product.price === 'number' ? product.price.toFixed(2) : parseFloat(String(product.price)).toFixed(2)}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Stock</p>
+                          <p className={`text-sm ${product.stock <= product.minStock ? 'text-red-600 font-medium' : ''}`}>
+                            {product.stock} {product.unit}
+                            {product.stock <= product.minStock && ' (Stock bajo)'}
+                          </p>
+                        </div>
+                      </div>
+                    </li>
+                  </AnimatedItem>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      )}      <Modal 
+        isOpen={showProductForm} 
         onClose={() => setShowProductForm(false)}
-        title={selectedProduct ? "Editar Producto" : "Crear Nuevo Producto"}
-        size="lg"
+        title={selectedProduct ? `Editar producto: ${selectedProduct.name}` : "Agregar nuevo producto"}
       >
-        <ProductForm
-          product={selectedProduct || undefined}
-          onSave={handleSaveProduct}
+        <ProductForm 
+          product={selectedProduct || undefined} 
+          onSave={handleSaveProduct} 
           onCancel={() => setShowProductForm(false)}
         />
       </Modal>
 
-      {/* Delete Confirmation Modal */}
-      <Modal
-        isOpen={showDeleteConfirm}
+      <Modal 
+        isOpen={showDeleteConfirm} 
         onClose={() => setShowDeleteConfirm(false)}
-        title="Confirmar Eliminación"
-        size="sm"
+        title="Confirmar eliminación"
       >
-        <div className="text-center">
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-            <Trash2 className="h-6 w-6 text-red-600" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">¿Eliminar producto?</h3>
-          <p className="text-sm text-gray-500 mb-6">
-            ¿Está seguro de que desea eliminar este producto? Esta acción no se puede deshacer y eliminará movimientos asociados.
-          </p>
-          <div className="flex justify-end gap-3">
+        <div className="p-6">
+          <p className="mb-4">¿Está seguro de que desea eliminar el producto <strong>{selectedProduct?.name}</strong>?</p>
+          <div className="flex justify-end space-x-3">
             <button
               type="button"
-              className="px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466]"
+              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               onClick={() => setShowDeleteConfirm(false)}
             >
               Cancelar
             </button>
             <button
               type="button"
-              className="px-4 py-2 bg-[#255466] border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-[#1d4050] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#255466]"
+              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               onClick={handleConfirmDelete}
             >
-              Confirmar Eliminación
+              Eliminar
             </button>
           </div>
         </div>

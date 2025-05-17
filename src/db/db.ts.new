@@ -1,0 +1,113 @@
+// Configuración de la conexión a la base de datos PostgreSQL
+import { Pool, PoolClient, QueryResult } from 'pg';
+import dotenv from 'dotenv';
+
+// Verificar si estamos en un entorno de navegador
+const isBrowser = typeof window !== 'undefined';
+
+// Cargar variables de entorno desde el archivo .env
+dotenv.config();
+
+// Interfaz para los resultados de la consulta en el entorno del navegador
+interface MockQueryResult {
+  rows: any[];
+  rowCount: number | null;
+}
+
+// Objeto de configuración para la conexión
+const dbConfig = {
+  host: process.env.PGHOST,
+  database: process.env.PGDATABASE,
+  user: process.env.PGUSER,
+  password: process.env.PGPASSWORD,
+  port: parseInt(process.env.PGPORT || '5432'),
+  ssl: process.env.PGSSLMODE === 'require' ? { rejectUnauthorized: false } : false,
+  max: 20, // Máximo número de clientes en el pool
+  idleTimeoutMillis: 30000, // Tiempo máximo en ms que un cliente puede estar inactivo
+  connectionTimeoutMillis: 2000, // Tiempo máximo en ms para esperar por un cliente
+};
+
+// Crear el pool de conexiones solo si no estamos en el navegador
+let pool: Pool | null = null;
+if (!isBrowser) {
+  pool = new Pool(dbConfig);
+  
+  // Evento para cuando se crea un cliente
+  pool.on('connect', () => {
+    console.log('Cliente de la base de datos conectado');
+  });
+
+  // Evento para cuando hay un error en el pool
+  pool.on('error', (err: Error) => {
+    console.error('Error inesperado en el cliente de PostgreSQL', err);
+    // Usamos process.exit para cerrar la aplicación cuando hay errores críticos
+    // En una aplicación de producción, es mejor manejar el error y reintentar
+    // process.exit(-1);
+  });
+}
+
+/**
+ * Función para ejecutar consultas SQL
+ * @param text - Texto de la consulta SQL
+ * @param params - Parámetros para la consulta
+ * @returns Promise con los resultados de la consulta
+ */
+export const query = async (text: string, params: any[] = []): Promise<QueryResult | MockQueryResult> => {
+  // Si estamos en el navegador, devolvemos un resultado simulado
+  if (isBrowser) {
+    console.log('Simulando consulta en el navegador:', text);
+    return {
+      rows: [],
+      rowCount: 0
+    };
+  }
+  
+  const start = Date.now();
+  
+  try {
+    if (!pool) {
+      throw new Error('No se ha inicializado el pool de conexiones');
+    }
+    
+    const res = await pool.query(text, params);
+    const duration = Date.now() - start;
+    console.log('Consulta ejecutada', { text, duration, rows: res.rowCount });
+    return res;
+  } catch (error) {
+    console.error('Error al ejecutar consulta', { text, error });
+    throw error;
+  }
+};
+
+/**
+ * Función para obtener un cliente del pool
+ * Útil para transacciones o cuando se necesitan múltiples consultas relacionadas
+ * @returns Promise con un cliente
+ */
+export const getClient = async () => {
+  // Si estamos en el navegador, devolvemos un cliente simulado
+  if (isBrowser || !pool) {
+    console.log('Simulando cliente en el navegador');
+    return {
+      query: () => Promise.resolve({ rows: [], rowCount: 0 }),
+      release: () => {},
+    };
+  }
+  
+  const client = await pool.connect();
+  const originalRelease = client.release;
+  
+  // Sobrescribir el método release para agregar registro
+  client.release = () => {
+    console.log('Cliente devuelto al pool');
+    return originalRelease.apply(client);
+  };
+  
+  return client;
+};
+
+export default {
+  query,
+  getClient,
+  pool
+};
