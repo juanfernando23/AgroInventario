@@ -52,4 +52,5 @@ export interface Sale {
   total: number;
   userId: string;
   userName: string;
+  estado?: string;
 }

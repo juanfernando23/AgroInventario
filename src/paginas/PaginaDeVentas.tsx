@@ -1,45 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MainLayout from '../components/estructura/principal';
 import SalesForm from '../components/ventas/FormularioVentas';
 import SalesList from '../components/ventas/ListaVentas';
 import SaleDetails from '../components/ventas/DetalleVentas';
 import Modal from '../components/comun/Modal';
-import { mockProducts, mockCurrentUser, mockSales } from '../data/SimulacionDatos';
 import { Sale, SaleItem } from '../types';
 import { ClipboardList, ShoppingCart } from 'lucide-react';
+import { useProductService } from '../services/ProductService';
+import { useSaleService } from '../services/SaleService';
+import { useNotification } from '../context/NotificationContext';
 
 const SalesPage: React.FC = () => {
+  // Servicios y contextos
+  const { products, loading: productsLoading } = useProductService();
+  const { sales, loading: salesLoading, error: salesError, addSale, searchSales, loadSales } = useSaleService();
+  const { showNotification } = useNotification();
+
+  // Estados del componente
   const [view, setView] = useState<'form' | 'history'>('form');
-  const [sales, setSales] = useState<Sale[]>(mockSales);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [lastSaleId, setLastSaleId] = useState<string | null>(null);
   const [showSaleDetails, setShowSaleDetails] = useState(false);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
 
-  const handleConfirmSale = (saleData: {
+  // Usuario simulado - En una app real, obtendríamos esto de un contexto de autenticación
+  const currentUser = { id: '1', name: 'Admin Usuario' };
+
+  // Manejar la confirmación de una nueva venta
+  // Cargar ventas al cambiar a la vista de historial
+  useEffect(() => {
+    if (view === 'history') {
+      loadSales();
+    }
+  }, [view, loadSales]);
+  const handleConfirmSale = async (saleData: {
     customer: string;
     date: string;
     items: SaleItem[];
     total: number;
+    estado?: string;
   }) => {
-    const newSale: Sale = {
-      id: `${sales.length + 1}`,
-      date: new Date().toISOString(),
-      customer: saleData.customer,
-      items: saleData.items,
-      total: saleData.total,
-      userId: mockCurrentUser.id,
-      userName: mockCurrentUser.name
-    };
-    
-    setSales([newSale, ...sales]);
-    setLastSaleId(newSale.id);
-    setShowSuccessMessage(true);
-    
-    // Hide success message after 5 seconds
-    setTimeout(() => {
-      setShowSuccessMessage(false);
-    }, 5000);
+    try {
+      // Prepare the sale data with user info
+      const fullSaleData = {
+        ...saleData,
+        userId: currentUser.id,
+        userName: currentUser.name
+      };
+      
+      // Add the sale via API
+      const newSale = await addSale(fullSaleData);
+      
+      // Show success message
+      setLastSaleId(newSale.id);
+      setShowSuccessMessage(true);
+      showNotification('success', `Venta #${newSale.id} registrada correctamente`);
+      
+      // Hide success message after 5 seconds
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+      }, 5000);
+    } catch (error: any) {
+      console.error('Error al confirmar venta:', error);
+      showNotification('error', `Error al registrar venta: ${error.message || 'Error desconocido'}`);
+    }
   };
 
   const handleViewSaleDetails = (sale: Sale) => {
@@ -99,9 +123,8 @@ const SalesPage: React.FC = () => {
           </div>
         )}
         
-        {view === 'form' ? (
-          <SalesForm 
-            products={mockProducts} 
+        {view === 'form' ? (          <SalesForm 
+            products={products || []} 
             onConfirmSale={handleConfirmSale} 
           />
         ) : (
