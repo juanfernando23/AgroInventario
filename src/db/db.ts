@@ -22,7 +22,7 @@ const dbConfig = {
 };
 
 // Crear el pool de conexiones solo si no estamos en el navegador
-let pool;
+let pool: Pool | undefined;
 if (!isBrowser) {
   pool = new Pool(dbConfig);
 
@@ -37,14 +37,14 @@ if (!isBrowser) {
 }
 
 /**
- * Funci�n para ejecutar consultas SQL
+ * Función para ejecutar consultas SQL
  * @param text - Texto de la consulta SQL
- * @param params - Par�metros para la consulta
+ * @param params - Parámetros para la consulta
  * @returns Promise con los resultados de la consulta
  */
-export const query = async (text, params = []) => {
+export const query = async (text: string, params: any[] = []) => {
   // En el navegador, devolvemos resultados simulados
-  if (isBrowser) {
+  if (isBrowser || !pool) {
     console.log('Simulando consulta en el navegador:', text);
     return { rows: [], rowCount: 0 };
   }
@@ -63,12 +63,12 @@ export const query = async (text, params = []) => {
 };
 
 /**
- * Funci�n para obtener un cliente del pool
+ * Función para obtener un cliente del pool
  * @returns Promise con un cliente
  */
 export const getClient = async () => {
   // En el navegador, devolvemos un cliente simulado
-  if (isBrowser) {
+  if (isBrowser || !pool) {
     return {
       query: async () => ({ rows: [], rowCount: 0 }),
       release: () => {}

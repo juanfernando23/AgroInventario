@@ -4,6 +4,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { ProductRepository } from './src/repositories/ProductRepository';
+import { MovementRepository } from './src/repositories/MovementRepository';
 
 // Crear la aplicación Express
 const app = express();

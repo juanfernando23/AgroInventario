@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Movement, Product } from '../../types';
-import { mockCurrentUser, mockProducts } from '../../data/SimulacionDatos';
+import { useProductService } from '../../services/ProductService';
 
 interface MovementFormProps {
   onSave: (movementData: Omit<Movement, 'id' | 'userName' | 'userId' | 'productName' | 'productSku'>) => void;
@@ -11,6 +11,7 @@ const MovementForm: React.FC<MovementFormProps> = ({
   onSave,
   onCancel
 }) => {
+  const { products, loading: productsLoading } = useProductService();
   const [formData, setFormData] = useState({
     productId: '',
     quantity: 1,
@@ -20,16 +21,17 @@ const MovementForm: React.FC<MovementFormProps> = ({
     date: new Date().toISOString().split('T')[0],
   });
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-
   // Actualizar el producto seleccionado cuando cambia el ID de producto
   useEffect(() => {
     if (formData.productId) {
-      const product = mockProducts.find(p => p.id === formData.productId) || null;
+      const product = products.find(p => String(p.id) === String(formData.productId)) || null;
+      console.log('Product ID seleccionado:', formData.productId);
+      console.log('Producto encontrado:', product);
       setSelectedProduct(product);
     } else {
       setSelectedProduct(null);
     }
-  }, [formData.productId]);
+  }, [formData.productId, products]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -98,13 +100,18 @@ const MovementForm: React.FC<MovementFormProps> = ({
               value={formData.productId}
               onChange={handleInputChange}
               className="appearance-none shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
-            >
-              <option value="">Seleccione un producto</option>
-              {mockProducts.map(product => (
-                <option key={product.id} value={product.id}>
-                  {product.name} - SKU: {product.sku}
-                </option>
-              ))}
+            >              <option value="">Seleccione un producto</option>
+              {productsLoading ? (
+                <option value="" disabled>Cargando productos...</option>
+              ) : products.length > 0 ? (
+                products.map(product => (
+                  <option key={product.id} value={product.id}>
+                    {product.name} - SKU: {product.sku}
+                  </option>
+                ))
+              ) : (
+                <option value="" disabled>No hay productos disponibles</option>
+              )}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
               <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
