@@ -4,6 +4,11 @@ const dotenv = require('dotenv');
 const { ProductRepository } = require('./src/repositories/ProductRepository.js');
 const { MovementRepository } = require('./src/repositories/MovementRepository.js');
 const { SaleRepository } = require('./src/repositories/SaleRepository.js');
+const { UserRepository } = require('./src/repositories/UserRepository.js');
+
+// Controladores de API
+//const userController = require('./src/controllers/UserController.js');
+//const authController = require('./src/controllers/AuthController.js');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -15,6 +20,11 @@ const port = process.env.API_PORT || 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Endpoint de prueba
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API de prueba funcionando correctamente' });
+});
 
 // Rutas API para productos
 app.get('/api/products', async (req, res) => {
@@ -278,6 +288,129 @@ app.post('/api/sales', async (req, res) => {
   } catch (error) {
     console.error('Error al crear venta:', error);
     res.status(500).json({ error: 'Error al crear la venta' });
+  }
+});
+
+// Rutas de autenticación
+app.post('/api/auth/login', async (req, res) => {
+  const { email, password } = req.body;
+  
+  try {
+    // Permitir autenticación con el usuario admin hardcoded para casos de emergencia
+    if (email === 'admin@agroinventario.com' && password === 'admin123') {
+      // Simular usuario autenticado
+      return res.json({
+        user: {
+          id: '1',
+          name: 'Admin Usuario',
+          email: 'admin@agroinventario.com',
+          role: 'admin'
+        },
+        token: 'token-simulado-1234567890'
+      });
+    }
+    
+    // Autenticar con la base de datos para el resto de usuarios
+    const authResult = await UserRepository.authenticate(email, password);
+    
+    if (authResult.success) {
+      // Generar un token simple (en producción sería un JWT)
+      const token = `token-${Date.now()}-${authResult.user.id}`;
+      
+      return res.json({
+        user: authResult.user,
+        token
+      });
+    } else {
+      return res.status(401).json({ 
+        error: authResult.message || 'Credenciales inválidas. Verifique su email y contraseña.',
+        errorType: authResult.message.includes('inactivo') ? 'inactive_user' : 'invalid_credentials'
+      });
+    }
+  } catch (error) {
+    console.error('Error en autenticación:', error);
+    return res.status(500).json({ error: 'Error al procesar la autenticación' });
+  }
+});
+
+app.post('/api/auth/verify-token', (req, res) => {
+  // Simulación de verificación de token
+  res.json({ 
+    valid: true,
+    user: {
+      id: '1',
+      name: 'Admin Usuario',
+      email: 'admin@agroinventario.com',
+      role: 'admin'
+    }
+  });
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  res.json({ success: true, message: 'Sesión cerrada correctamente' });
+});
+
+// Rutas API para usuarios
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await UserRepository.getAll();
+    res.json(users);
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    res.status(500).json({ error: 'Error al obtener usuarios' });
+  }
+});
+
+app.get('/api/users/:id', async (req, res) => {
+  try {
+    const user = await UserRepository.getById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error(`Error al obtener usuario con ID ${req.params.id}:`, error);
+    res.status(500).json({ error: 'Error al obtener el usuario' });
+  }
+});
+
+app.post('/api/users', async (req, res) => {
+  try {
+    const newUser = await UserRepository.create(req.body);
+    res.status(201).json(newUser);
+  } catch (error) {
+    console.error('Error al crear usuario:', error);
+    // Si es un error de email duplicado, devolver un mensaje específico
+    if (error.message && error.message.includes('ya está registrado')) {
+      return res.status(400).json({ error: error.message });
+    }
+    res.status(500).json({ error: 'Error al crear el usuario' });
+  }
+});
+
+app.put('/api/users/:id', async (req, res) => {
+  try {
+    const updatedUser = await UserRepository.update(req.params.id, req.body);
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    res.json(updatedUser);
+  } catch (error) {
+    console.error(`Error al actualizar usuario con ID ${req.params.id}:`, error);
+    res.status(500).json({ error: 'Error al actualizar el usuario' });
+  }
+});
+
+app.delete('/api/users/:id', async (req, res) => {
+  try {
+    const result = await UserRepository.delete(req.params.id);
+    if (!result.success) {
+      return res.status(404).json({ error: result.message || 'Usuario no encontrado' });
+    }
+    res.json(result);
+  } catch (error) {
+    console.error(`Error al eliminar usuario con ID ${req.params.id}:`, error);
+    res.status(500).json({ error: 'Error al eliminar el usuario' });
   }
 });
 

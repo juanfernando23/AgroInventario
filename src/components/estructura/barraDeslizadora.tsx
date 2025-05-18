@@ -17,15 +17,25 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const { pathname } = useLocation();
-  const { logout, user } = useAuth();
+  const { logout, user, isAdmin } = useAuth();
 
-  const navItems = [
+  // Elementos de navegación base que todos los usuarios pueden ver
+  const baseNavItems = [
     { path: '/dashboard', name: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
     { path: '/productos', name: 'Productos', icon: <Package2 className="w-5 h-5" /> },
     { path: '/movimientos', name: 'Movimientos', icon: <RepeatIcon className="w-5 h-5" /> },
     { path: '/ventas', name: 'Ventas', icon: <ShoppingCart className="w-5 h-5" /> },
+  ];
+  
+  // Elementos de navegación para administradores
+  const adminNavItems = [
     { path: '/usuarios', name: 'Usuarios', icon: <Users className="w-5 h-5" /> },
   ];
+  
+  // Combinar los elementos según el rol del usuario
+  const navItems = isAdmin 
+    ? [...baseNavItems, ...adminNavItems] 
+    : baseNavItems;
 
   const handleLogout = () => {
     if (onClose) onClose();

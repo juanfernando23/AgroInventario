@@ -26,6 +26,7 @@ export default defineConfig({
       'pg-pool': path.resolve(__dirname, './src/db/node-shims.js'),
       'pg-promise': path.resolve(__dirname, './src/db/node-shims.js')
     },
+    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'] // Añadido para resolución explícita
   },
   // Evitar que Vite intente buscar módulos específicos de Node.js
   // que no son compatibles con el navegador
