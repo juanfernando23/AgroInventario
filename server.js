@@ -4,6 +4,11 @@ const dotenv = require('dotenv');
 const { ProductRepository } = require('./src/repositories/ProductRepository.js');
 const { MovementRepository } = require('./src/repositories/MovementRepository.js');
 const { SaleRepository } = require('./src/repositories/SaleRepository.js');
+//const { UserRepository } = require('./src/repositories/UserRepository.js');
+
+// Controladores de API
+//const userController = require('./src/controllers/UserController.js');
+//const authController = require('./src/controllers/AuthController.js');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -15,6 +20,11 @@ const port = process.env.API_PORT || 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Endpoint de prueba
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'API de prueba funcionando correctamente' });
+});
 
 // Rutas API para productos
 app.get('/api/products', async (req, res) => {
@@ -279,6 +289,44 @@ app.post('/api/sales', async (req, res) => {
     console.error('Error al crear venta:', error);
     res.status(500).json({ error: 'Error al crear la venta' });
   }
+});
+
+// Rutas de autenticación simples
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body;
+  
+  // Simulación de autenticación
+  if (email === 'admin@agroinventario.com' && password === 'admin123') {
+    // Simular usuario autenticado
+    return res.json({
+      user: {
+        id: '1',
+        name: 'Admin Usuario',
+        email: 'admin@agroinventario.com',
+        role: 'admin'
+      },
+      token: 'token-simulado-1234567890'
+    });
+  }
+  
+  return res.status(401).json({ error: 'Credenciales inválidas' });
+});
+
+app.post('/api/auth/verify-token', (req, res) => {
+  // Simulación de verificación de token
+  res.json({ 
+    valid: true,
+    user: {
+      id: '1',
+      name: 'Admin Usuario',
+      email: 'admin@agroinventario.com',
+      role: 'admin'
+    }
+  });
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  res.json({ success: true, message: 'Sesión cerrada correctamente' });
 });
 
 // Iniciar el servidor
