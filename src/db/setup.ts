@@ -103,6 +103,60 @@ async function seedProducts() {
   }
 }
 
+// Función para verificar si la tabla de movimientos existe
+async function checkMovementsTable() {
+  if (isBrowser) {
+    console.log('Saltando verificación de tabla movements en el navegador');
+    return true;
+  }
+  
+  try {
+    const result = await query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'movements'
+      );
+    `);
+    
+    return result.rows[0].exists;
+  } catch (error) {
+    console.error('Error al verificar la tabla movements:', error);
+    throw error;
+  }
+}
+
+// Función para crear la tabla de movimientos
+async function createMovementsTable() {
+  try {
+    // Primero eliminamos la tabla existente si no tiene la estructura correcta
+    await query(`DROP TABLE IF EXISTS movements;`);
+    
+    // Luego creamos la tabla con la estructura completa necesaria
+    await query(`
+      CREATE TABLE IF NOT EXISTS movements (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        date TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        type VARCHAR(20) NOT NULL CHECK (type IN ('entrada', 'salida', 'venta', 'ajuste')),
+        product_id VARCHAR(255) NOT NULL,
+        product_name VARCHAR(255) NOT NULL,
+        product_sku VARCHAR(100) NOT NULL,
+        quantity INTEGER NOT NULL,
+        user_id VARCHAR(255) NOT NULL,
+        user_name VARCHAR(255) NOT NULL,
+        reason VARCHAR(255) NOT NULL,
+        notes TEXT
+      );
+    `);
+    
+    console.log('Tabla movements creada exitosamente');
+    return true;
+  } catch (error) {
+    console.error('Error al crear la tabla movements:', error);
+    throw error;
+  }
+}
+
 // Función principal para configurar la base de datos
 export async function setupDatabase() {
   // Saltamos la configuración de la base de datos en el navegador
@@ -114,14 +168,25 @@ export async function setupDatabase() {
   try {
     console.log('Iniciando configuración de la base de datos...');
     
-    const tableExists = await checkProductsTable();
+    // Configurar tabla de productos
+    const productsTableExists = await checkProductsTable();
     
-    if (!tableExists) {
+    if (!productsTableExists) {
       console.log('La tabla products no existe, creándola...');
       await createProductsTable();
       await seedProducts();
     } else {
       console.log('La tabla products ya existe');
+    }
+    
+    // Configurar tabla de movimientos
+    const movementsTableExists = await checkMovementsTable();
+    
+    if (!movementsTableExists) {
+      console.log('La tabla movements no existe, creándola...');
+      await createMovementsTable();
+    } else {
+      console.log('La tabla movements ya existe');
     }
     
     console.log('Configuración de la base de datos completada');
@@ -137,5 +202,7 @@ export default {
   setupDatabase,
   checkProductsTable,
   createProductsTable,
-  seedProducts
+  seedProducts,
+  checkMovementsTable,
+  createMovementsTable
 };

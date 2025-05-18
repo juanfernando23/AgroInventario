@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Package2, 
   DollarSign, 
@@ -8,32 +8,59 @@ import {
 import StatCard from '../components/comun/TarjetaEstadisticas';
 import RecentList from '../components/dashboard/ListaReciente';
 import MainLayout from '../components/estructura/principal';
-import { mockProducts, mockMovements } from '../data/SimulacionDatos';
+import { mockProducts } from '../data/SimulacionDatos';
+import { useMovementService } from '../services/MovementService';
+import { useProductService } from '../services/ProductService';
+import { Movement, Product } from '../types';
 
 const DashboardPage: React.FC = () => {
+  const { getRecentMovements } = useMovementService();
+  const { products } = useProductService();
+  const [recentMovements, setRecentMovements] = useState<Movement[]>([]);
+  const [todayMovementsCount, setTodayMovementsCount] = useState<number>(0);
+  const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const loadRecentMovements = async () => {
+      try {
+        const movements = await getRecentMovements(5);
+        setRecentMovements(movements);
+        
+        // Calcular movimientos de hoy
+        const today = new Date().toDateString();
+        const todayCount = movements.filter(
+          movement => new Date(movement.date).toDateString() === today
+        ).length;
+        setTodayMovementsCount(todayCount);
+      } catch (error) {
+        console.error('Error al cargar movimientos recientes:', error);
+        setRecentMovements([]);
+        setTodayMovementsCount(0);
+      }
+    };
+    
+    loadRecentMovements();
+  }, [getRecentMovements]);
+
+  useEffect(() => {
+    // Usar products del servicio si están disponibles, o mockProducts como respaldo
+    const availableProducts = products.length > 0 ? products : mockProducts;
+    const recent = [...availableProducts]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5);
+    setRecentProducts(recent);
+  }, [products]);
+
   // Calculate dashboard statistics
-  const totalProducts = mockProducts.length;
-  const totalInventoryValue = mockProducts.reduce(
+  const totalProducts = products.length > 0 ? products.length : mockProducts.length;
+  const totalInventoryValue = (products.length > 0 ? products : mockProducts).reduce(
     (total, product) => total + (product.price * product.stock), 
     0
   ).toFixed(2);
   
-  const lowStockProducts = mockProducts.filter(
+  const lowStockProducts = (products.length > 0 ? products : mockProducts).filter(
     product => product.stock <= product.minStock
   ).length;
-  
-  const todayMovements = mockMovements.filter(
-    movement => new Date(movement.date).toDateString() === new Date().toDateString()
-  ).length;
-
-  // Recent products and movements
-  const recentProducts = [...mockProducts]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 5);
-
-  const recentMovements = [...mockMovements]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 5);
 
   // Format date for display
   const formatDate = (dateString: string) => {
@@ -88,7 +115,7 @@ const DashboardPage: React.FC = () => {
           />
           <StatCard 
             title="Movimientos de Hoy"
-            value={todayMovements}
+            value={todayMovementsCount}
             icon={<ArrowRightLeft className="h-6 w-6" />}
             color="orange"
             delay={400}
