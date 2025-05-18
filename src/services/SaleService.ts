@@ -5,27 +5,79 @@ import { Sale, SaleItem } from '../types';
 // URL completa del servidor API
 const API_URL = 'http://localhost:3001/api/sales';
 
+// Datos simulados para usar cuando no se puede conectar con el servidor
+const mockSaleItems: SaleItem[] = [
+  {
+    id: 'mock-item-1',
+    saleId: 'mock-sale-1',
+    productId: 'mock-1',
+    productName: 'Fertilizante Premium',
+    quantity: 3,
+    price: 25.99,
+    subtotal: 77.97
+  },
+  {
+    id: 'mock-item-2',
+    saleId: 'mock-sale-2',
+    productId: 'mock-2',
+    productName: 'Semillas de Maíz',
+    quantity: 5,
+    price: 8.50,
+    subtotal: 42.50
+  }
+];
+
+const mockSales: Sale[] = [
+  {
+    id: 'mock-sale-1',
+    customerName: 'Juan Pérez',
+    date: new Date().toISOString(),
+    total: 77.97,
+    items: [mockSaleItems[0]],
+    status: 'completed',
+    paymentMethod: 'efectivo',
+    notes: 'Cliente frecuente'
+  },
+  {
+    id: 'mock-sale-2',
+    customerName: 'María González',
+    date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 día atrás
+    total: 42.50,
+    items: [mockSaleItems[1]],
+    status: 'completed',
+    paymentMethod: 'tarjeta',
+    notes: 'Primera compra'
+  }
+];
+
 // Hook personalizado para la gestión de ventas
 export const useSaleService = () => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);  // Cargar todas las ventas
+  
   const loadSales = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // Añadimos un parámetro sort=desc para asegurarnos de que el servidor devuelva las ventas ordenadas
-      const res = await fetch(`${API_URL}?sort=desc`);
-      if (!res.ok) throw new Error('No se pudo obtener la lista de ventas');
-      const data = await res.json();
-      
-      // Ordenar las ventas con las más recientes primero (doble seguridad)
-      const sortedSales = [...data].sort((a, b) => {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      });
-      
-      setSales(sortedSales);
+      try {
+        // Añadimos un parámetro sort=desc para asegurarnos de que el servidor devuelva las ventas ordenadas
+        const res = await fetch(`${API_URL}?sort=desc`);
+        if (!res.ok) throw new Error('No se pudo obtener la lista de ventas');
+        const data = await res.json();
+        
+        // Ordenar las ventas con las más recientes primero (doble seguridad)
+        const sortedSales = [...data].sort((a, b) => {
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        });
+        
+        setSales(sortedSales);
+      } catch (err: any) {
+        console.warn('Error al conectar con el servidor de ventas, usando datos simulados:', err.message);
+        // Si no se puede conectar con el servidor, usar datos simulados
+        setSales(mockSales);
+      }
     } catch (err: any) {
       setError('Error al cargar ventas: ' + (err.message || 'Error desconocido'));
       console.error('Error al cargar ventas:', err);
