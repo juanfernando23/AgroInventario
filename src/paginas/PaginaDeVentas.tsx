@@ -72,10 +72,9 @@ const SalesPage: React.FC = () => {
   };
 
   return (
-    <MainLayout>
-      <div>
+    <MainLayout>      <div>
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-gray-900">
             {view === 'form' ? 'Registrar Nueva Venta' : 'Historial de Ventas'}
           </h1>
           
