@@ -322,7 +322,10 @@ app.post('/api/auth/login', async (req, res) => {
         token
       });
     } else {
-      return res.status(401).json({ error: authResult.message || 'Credenciales inválidas' });
+      return res.status(401).json({ 
+        error: authResult.message || 'Credenciales inválidas. Verifique su email y contraseña.',
+        errorType: authResult.message.includes('inactivo') ? 'inactive_user' : 'invalid_credentials'
+      });
     }
   } catch (error) {
     console.error('Error en autenticación:', error);
