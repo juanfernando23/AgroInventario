@@ -51,11 +51,10 @@ const UsersPage: React.FC = () => {
   if (!isAdmin) {
     return null; // No renderizar nada si no es admin (se redirigirá)
   }
-
   return (
     <MainLayout>
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Gestión de Usuarios</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">Gestión de Usuarios</h1>
         
         {error && (
           <div className="mb-4 bg-red-50 border-l-4 border-red-500 p-4">

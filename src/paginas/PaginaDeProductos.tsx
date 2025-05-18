@@ -56,11 +56,10 @@ const ProductsPage: React.FC = () => {
       console.error('Error al buscar productos:', error);
       showNotification('error', `Error al buscar productos: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
-  };
-  return (
+  };  return (
     <MainLayout>
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Productos</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">Productos</h1>
         
         {error && (
           <div className="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700">

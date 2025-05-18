@@ -102,11 +102,10 @@ const DashboardPage: React.FC = () => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
-
   return (
     <MainLayout>
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
+        <h1 className="text-4xl font-bold text-gray-900 mb-6">Dashboard</h1>
             {/* Statistics Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 mb-6 md:mb-8">
           <StatCard 
