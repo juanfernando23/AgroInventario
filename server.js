@@ -291,25 +291,43 @@ app.post('/api/sales', async (req, res) => {
   }
 });
 
-// Rutas de autenticación simples
-app.post('/api/auth/login', (req, res) => {
+// Rutas de autenticación
+app.post('/api/auth/login', async (req, res) => {
   const { email, password } = req.body;
   
-  // Simulación de autenticación
-  if (email === 'admin@agroinventario.com' && password === 'admin123') {
-    // Simular usuario autenticado
-    return res.json({
-      user: {
-        id: '1',
-        name: 'Admin Usuario',
-        email: 'admin@agroinventario.com',
-        role: 'admin'
-      },
-      token: 'token-simulado-1234567890'
-    });
+  try {
+    // Permitir autenticación con el usuario admin hardcoded para casos de emergencia
+    if (email === 'admin@agroinventario.com' && password === 'admin123') {
+      // Simular usuario autenticado
+      return res.json({
+        user: {
+          id: '1',
+          name: 'Admin Usuario',
+          email: 'admin@agroinventario.com',
+          role: 'admin'
+        },
+        token: 'token-simulado-1234567890'
+      });
+    }
+    
+    // Autenticar con la base de datos para el resto de usuarios
+    const authResult = await UserRepository.authenticate(email, password);
+    
+    if (authResult.success) {
+      // Generar un token simple (en producción sería un JWT)
+      const token = `token-${Date.now()}-${authResult.user.id}`;
+      
+      return res.json({
+        user: authResult.user,
+        token
+      });
+    } else {
+      return res.status(401).json({ error: authResult.message || 'Credenciales inválidas' });
+    }
+  } catch (error) {
+    console.error('Error en autenticación:', error);
+    return res.status(500).json({ error: 'Error al procesar la autenticación' });
   }
-  
-  return res.status(401).json({ error: 'Credenciales inválidas' });
 });
 
 app.post('/api/auth/verify-token', (req, res) => {
