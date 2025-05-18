@@ -9,6 +9,7 @@ interface SalesFormProps {
     date: string;
     items: SaleItem[];
     total: number;
+    estado?: string;
   }) => void;
 }
 
@@ -17,6 +18,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
   const [customer, setCustomer] = useState('');
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
+  const [estado, setEstado] = useState<string>('completada');
 
   const searchResults = searchTerm 
     ? products.filter(p => 
@@ -90,19 +92,22 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
       customer,
       date: saleDate,
       items: cartItems,
-      total: totalAmount
+      total: totalAmount,
+      estado
     });
     
     // Reset form
     setCartItems([]);
     setCustomer('');
     setSaleDate(new Date().toISOString().split('T')[0]);
+    setEstado('completada');
   };
 
   const handleCancelSale = () => {
     setCartItems([]);
     setCustomer('');
     setSaleDate(new Date().toISOString().split('T')[0]);
+    setEstado('completada');
   };
 
   return (
@@ -276,6 +281,24 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
                     onChange={(e) => setSaleDate(e.target.value)}
                     className="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
                   />
+                </div>
+              </div>
+              
+              <div className="sm:col-span-3">
+                <label htmlFor="estado" className="block text-sm font-medium text-gray-700 text-left mb-2">
+                  Estado de Venta
+                </label>
+                <div>
+                  <select
+                    id="estado"
+                    value={estado}
+                    onChange={(e) => setEstado(e.target.value)}
+                    className="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
+                  >
+                    <option value="completada">Completada</option>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="cancelada">Cancelada</option>
+                  </select>
                 </div>
               </div>
             </div>

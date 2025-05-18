@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const { ProductRepository } = require('./src/repositories/ProductRepository.js');
 const { MovementRepository } = require('./src/repositories/MovementRepository.js');
+const { SaleRepository } = require('./src/repositories/SaleRepository.js');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -177,6 +178,106 @@ app.get('/api/movements/recent', async (req, res) => {
   } catch (error) {
     console.error('Error al obtener movimientos recientes:', error);
     res.status(500).json({ error: 'Error al obtener movimientos recientes' });
+  }
+});
+
+// Rutas API para ventas
+app.get('/api/sales', async (req, res) => {
+  try {
+    const sales = await SaleRepository.getAll();
+    res.json(sales);
+  } catch (error) {
+    console.error('Error al obtener ventas:', error);
+    res.status(500).json({ error: 'Error al obtener ventas' });
+  }
+});
+
+// Rutas especiales para ventas (deben ir antes que las rutas con parámetros)
+app.get('/api/sales/search', async (req, res) => {
+  try {
+    const filters = {
+      customer: req.query.customer,
+      dateFrom: req.query.dateFrom,
+      dateTo: req.query.dateTo
+    };
+    
+    const sales = await SaleRepository.search(filters);
+    res.json(sales);
+  } catch (error) {
+    console.error('Error al buscar ventas:', error);
+    res.status(500).json({ error: 'Error al buscar ventas' });
+  }
+});
+
+app.get('/api/sales/recent', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit || '5');
+    const sales = await SaleRepository.getRecent(limit);
+    res.json(sales);
+  } catch (error) {
+    console.error('Error al obtener ventas recientes:', error);
+    res.status(500).json({ error: 'Error al obtener ventas recientes' });
+  }
+});
+
+app.get('/api/sales/:id', async (req, res) => {
+  try {
+    const sale = await SaleRepository.getById(req.params.id);
+    if (!sale) {
+      return res.status(404).json({ error: 'Venta no encontrada' });
+    }
+    res.json(sale);
+  } catch (error) {
+    console.error(`Error al obtener venta con ID ${req.params.id}:`, error);
+    res.status(500).json({ error: 'Error al obtener la venta' });
+  }
+});
+
+app.post('/api/sales', async (req, res) => {
+  try {
+    // Crear la venta en la base de datos
+    const newSale = await SaleRepository.create(req.body);
+    
+    // Crear movimientos de inventario para cada producto vendido
+    for (const item of req.body.items) {
+      try {
+        // Crear un movimiento de tipo "venta" para cada producto
+        const movementData = {
+          date: req.body.date,
+          type: 'venta',
+          productId: item.productId,
+          productName: item.productName,
+          productSku: item.productSku,
+          quantity: item.quantity,
+          userId: req.body.userId,
+          userName: req.body.userName,
+          reason: `Venta #${newSale.id}`,
+          notes: req.body.customer ? `Cliente: ${req.body.customer}` : 'Venta directa'
+        };
+        
+        // Crear el movimiento y actualizar el stock
+        await MovementRepository.create(movementData);
+        
+        // Obtener el producto actual
+        const product = await ProductRepository.getById(item.productId);
+        
+        if (product) {
+          // Actualizar el stock del producto
+          await ProductRepository.update(item.productId, {
+            ...product,
+            stock: Math.max(0, product.stock - item.quantity)
+          });
+        }
+      } catch (itemError) {
+        console.error(`Error al procesar el ítem ${item.productId} de la venta:`, itemError);
+        // Continuamos con los demás ítems aunque falle este
+      }
+    }
+    
+    res.status(201).json(newSale);
+  } catch (error) {
+    console.error('Error al crear venta:', error);
+    res.status(500).json({ error: 'Error al crear la venta' });
   }
 });
 

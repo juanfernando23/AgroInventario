@@ -126,6 +126,52 @@ async function checkMovementsTable() {
   }
 }
 
+// Función para verificar si la tabla de ventas existe
+async function checkSalesTable() {
+  if (isBrowser) {
+    console.log('Saltando verificación de tabla sales en el navegador');
+    return true;
+  }
+  
+  try {
+    const result = await query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'sales'
+      );
+    `);
+    
+    return result.rows[0].exists;
+  } catch (error) {
+    console.error('Error al verificar la tabla sales:', error);
+    throw error;
+  }
+}
+
+// Función para verificar si la tabla de items de venta existe
+async function checkSaleItemsTable() {
+  if (isBrowser) {
+    console.log('Saltando verificación de tabla sale_items en el navegador');
+    return true;
+  }
+  
+  try {
+    const result = await query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'sale_items'
+      );
+    `);
+    
+    return result.rows[0].exists;
+  } catch (error) {
+    console.error('Error al verificar la tabla sale_items:', error);
+    throw error;
+  }
+}
+
 // Función para crear la tabla de movimientos
 async function createMovementsTable() {
   try {
@@ -153,6 +199,53 @@ async function createMovementsTable() {
     return true;
   } catch (error) {
     console.error('Error al crear la tabla movements:', error);
+    throw error;
+  }
+}
+
+// Función para crear la tabla de ventas
+async function createSalesTable() {
+  try {
+    await query(`
+      CREATE TABLE IF NOT EXISTS sales (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        date TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        customer VARCHAR(255),
+        user_id VARCHAR(255) NOT NULL,
+        user_name VARCHAR(255) NOT NULL,
+        total DECIMAL(10, 2) NOT NULL CHECK (total >= 0)
+      );
+    `);
+    
+    console.log('Tabla sales creada exitosamente');
+    return true;
+  } catch (error) {
+    console.error('Error al crear la tabla sales:', error);
+    throw error;
+  }
+}
+
+// Función para crear la tabla de items de venta
+async function createSaleItemsTable() {
+  try {
+    await query(`
+      CREATE TABLE IF NOT EXISTS sale_items (
+        id SERIAL PRIMARY KEY,
+        sale_id UUID NOT NULL,
+        product_id VARCHAR(255) NOT NULL,
+        product_name VARCHAR(255) NOT NULL,
+        product_sku VARCHAR(100) NOT NULL,
+        quantity INTEGER NOT NULL CHECK (quantity > 0),
+        price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
+        subtotal DECIMAL(10, 2) NOT NULL CHECK (subtotal >= 0),
+        FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE
+      );
+    `);
+    
+    console.log('Tabla sale_items creada exitosamente');
+    return true;
+  } catch (error) {
+    console.error('Error al crear la tabla sale_items:', error);
     throw error;
   }
 }
@@ -189,6 +282,26 @@ export async function setupDatabase() {
       console.log('La tabla movements ya existe');
     }
     
+    // Configurar tabla de ventas
+    const salesTableExists = await checkSalesTable();
+    
+    if (!salesTableExists) {
+      console.log('La tabla sales no existe, creándola...');
+      await createSalesTable();
+    } else {
+      console.log('La tabla sales ya existe');
+    }
+    
+    // Configurar tabla de items de venta
+    const saleItemsTableExists = await checkSaleItemsTable();
+    
+    if (!saleItemsTableExists) {
+      console.log('La tabla sale_items no existe, creándola...');
+      await createSaleItemsTable();
+    } else {
+      console.log('La tabla sale_items ya existe');
+    }
+    
     console.log('Configuración de la base de datos completada');
     return true;
   } catch (error) {
@@ -204,5 +317,9 @@ export default {
   createProductsTable,
   seedProducts,
   checkMovementsTable,
-  createMovementsTable
+  createMovementsTable,
+  checkSalesTable,
+  createSalesTable,
+  checkSaleItemsTable,
+  createSaleItemsTable
 };

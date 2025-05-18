@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Eye } from 'lucide-react';
+import { Eye, Search, RefreshCw } from 'lucide-react';
 import { Sale } from '../../types';
+import { useSaleService } from '../../services/SaleService';
 
 interface SalesListProps {
   sales: Sale[];
@@ -8,12 +9,14 @@ interface SalesListProps {
 }
 
 const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
+  // Acceder al servicio de ventas para búsquedas
+  const { searchSales, loading } = useSaleService();
+  
   const [filters, setFilters] = useState({
     customer: '',
     dateFrom: '',
     dateTo: '',
   });
-
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFilters(prev => ({
@@ -22,19 +25,28 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
     }));
   };
 
-  const filteredSales = sales.filter(sale => {
-    const matchesCustomer = !filters.customer || 
-      (sale.customer && sale.customer.toLowerCase().includes(filters.customer.toLowerCase()));
+  // Aplicar filtros a través de la API
+  const handleApplyFilters = async () => {
+    // Solo enviar filtros que tengan valor
+    const filtersToApply: any = {};
+    if (filters.customer) filtersToApply.customer = filters.customer;
+    if (filters.dateFrom) filtersToApply.dateFrom = filters.dateFrom;
+    if (filters.dateTo) filtersToApply.dateTo = filters.dateTo;
     
-    const saleDate = new Date(sale.date);
-    const matchesDateFrom = !filters.dateFrom || 
-      saleDate >= new Date(filters.dateFrom);
-    
-    const matchesDateTo = !filters.dateTo || 
-      saleDate <= new Date(filters.dateTo + 'T23:59:59');
-    
-    return matchesCustomer && matchesDateFrom && matchesDateTo;
-  });
+    await searchSales(filtersToApply);
+  };
+
+  // Limpiar filtros
+  const handleClearFilters = () => {
+    setFilters({
+      customer: '',
+      dateFrom: '',
+      dateTo: '',
+    });
+    searchSales({}); // Buscar sin filtros para mostrar todos
+  };
+
+  const filteredSales = sales;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -47,9 +59,17 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
     });
   };
 
+  const getEstadoVentaClass = (estado?: string) => {
+    switch(estado) {
+      case 'completada': return 'bg-green-100 text-green-800';
+      case 'pendiente': return 'bg-yellow-100 text-yellow-800';
+      case 'cancelada': return 'bg-red-100 text-red-800';
+      default: return 'bg-green-100 text-green-800';
+    }
+  };
+
   return (
-    <div>
-      <div className="bg-white shadow rounded-lg p-6 mb-6">
+    <div>      <div className="bg-white shadow rounded-lg p-6 mb-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Filtros</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
@@ -95,9 +115,32 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
             />
           </div>
         </div>
+        
+        <div className="mt-4 flex justify-end space-x-3">
+          <button
+            onClick={handleClearFilters}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Limpiar
+          </button>
+          <button
+            onClick={handleApplyFilters}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#255466] hover:bg-[#1d4050]"
+            disabled={loading}
+          >
+            <Search className="w-4 h-4 mr-2" />
+            Buscar
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white shadow overflow-hidden rounded-lg">
+      <div className="bg-white shadow overflow-hidden rounded-lg">{loading ? (
+        <div className="p-6 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#255466] mx-auto"></div>
+          <p className="mt-2 text-sm text-gray-500">Cargando ventas...</p>
+        </div>
+      ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -118,6 +161,9 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
                   Productos
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Estado
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Vendedor
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -128,7 +174,7 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredSales.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
+                  <td colSpan={8} className="px-6 py-4 text-center text-sm text-gray-500">
                     No se encontraron ventas que coincidan con los filtros.
                   </td>
                 </tr>
@@ -150,6 +196,11 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {sale.items.length} {sale.items.length === 1 ? 'producto' : 'productos'}
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getEstadoVentaClass(sale.estado)}`}>
+                        {sale.estado || 'Completada'}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {sale.userName}
                     </td>
@@ -167,6 +218,7 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
             </tbody>
           </table>
         </div>
+      )}
       </div>
     </div>
   );
