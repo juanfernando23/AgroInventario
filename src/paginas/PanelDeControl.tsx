@@ -3,7 +3,8 @@ import {
   Package2, 
   DollarSign, 
   AlertTriangle, 
-  ArrowRightLeft 
+  ArrowRightLeft,
+  ShoppingCart
 } from 'lucide-react';
 import StatCard from '../components/comun/TarjetaEstadisticas';
 import RecentList from '../components/dashboard/ListaReciente';
@@ -11,15 +12,17 @@ import MainLayout from '../components/estructura/principal';
 import { mockProducts } from '../data/SimulacionDatos';
 import { useMovementService } from '../services/MovementService';
 import { useProductService } from '../services/ProductService';
+import { useSaleService } from '../services/SaleService';
 import { Movement, Product } from '../types';
 
 const DashboardPage: React.FC = () => {
   const { getRecentMovements } = useMovementService();
   const { products } = useProductService();
+  const { getRecentSales, getTodaySales } = useSaleService();
   const [recentMovements, setRecentMovements] = useState<Movement[]>([]);
   const [todayMovementsCount, setTodayMovementsCount] = useState<number>(0);
+  const [todaySalesCount, setTodaySalesCount] = useState<number>(0);
   const [recentProducts, setRecentProducts] = useState<Product[]>([]);
-
   useEffect(() => {
     const loadRecentMovements = async () => {
       try {
@@ -41,6 +44,21 @@ const DashboardPage: React.FC = () => {
     
     loadRecentMovements();
   }, [getRecentMovements]);
+  // Cargar ventas recientes y calcular ventas del día
+  useEffect(() => {
+    const loadRecentSales = async () => {
+      try {
+        // Usar la nueva función para obtener directamente las ventas de hoy
+        const todayCount = await getTodaySales();
+        setTodaySalesCount(todayCount);
+      } catch (error) {
+        console.error('Error al cargar ventas recientes:', error);
+        setTodaySalesCount(0);
+      }
+    };
+    
+    loadRecentSales();
+  }, [getTodaySales]);
 
   useEffect(() => {
     // Usar products del servicio si están disponibles, o mockProducts como respaldo
@@ -89,9 +107,8 @@ const DashboardPage: React.FC = () => {
     <MainLayout>
       <div>
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
-        
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 md:mb-8">
+            {/* Statistics Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 mb-6 md:mb-8">
           <StatCard 
             title="Total de Productos"
             value={totalProducts}
@@ -112,6 +129,13 @@ const DashboardPage: React.FC = () => {
             icon={<AlertTriangle className="h-6 w-6" />}
             color={lowStockProducts > 0 ? "red" : "green"}
             delay={300}
+          />
+          <StatCard 
+            title="Ventas de Hoy"
+            value={todaySalesCount}
+            icon={<ShoppingCart className="h-6 w-6" />}
+            color="purple"
+            delay={350}
           />
           <StatCard 
             title="Movimientos de Hoy"

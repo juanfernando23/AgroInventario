@@ -120,8 +120,7 @@ export const useSaleService = () => {
       console.error('Error al buscar ventas:', err);
     } finally {
       setLoading(false);
-    }
-  };
+    }  };
 
   // Obtener ventas recientes
   const getRecentSales = async (limit: number = 5): Promise<Sale[]> => {
@@ -141,6 +140,30 @@ export const useSaleService = () => {
     }
   };
 
+  // Obtener el número de ventas de hoy
+  const getTodaySales = async (): Promise<number> => {
+    try {
+      const today = new Date();
+      const formattedDate = today.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+      
+      // Obtener todas las ventas
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error('No se pudieron obtener las ventas');
+      
+      const data: Sale[] = await res.json();
+      
+      // Filtrar ventas de hoy
+      const todaySales = data.filter(sale => {
+        const saleDate = new Date(sale.date).toISOString().split('T')[0];
+        return saleDate === formattedDate;
+      });
+      
+      return todaySales.length;
+    } catch (err: any) {
+      console.error('Error al obtener ventas de hoy:', err);
+      return 0;
+    }
+  };
   return {
     sales,
     loading,
@@ -149,6 +172,7 @@ export const useSaleService = () => {
     addSale,
     getSaleById,
     searchSales,
-    getRecentSales
+    getRecentSales,
+    getTodaySales
   };
 };

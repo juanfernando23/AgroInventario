@@ -8,7 +8,7 @@ interface StatCardProps {
     value: number;
     isPositive: boolean;
   };
-  color?: 'default' | 'green' | 'blue' | 'orange' | 'red';
+  color?: 'default' | 'green' | 'blue' | 'orange' | 'red' | 'purple';
   delay?: number; // Delay for staggered animation
 }
 
@@ -29,7 +29,6 @@ const StatCard: React.FC<StatCardProps> = ({
     
     return () => clearTimeout(timer);
   }, [delay]);
-
   const colorClasses = {
     default: {
       bg: 'bg-white',
@@ -55,6 +54,11 @@ const StatCard: React.FC<StatCardProps> = ({
       bg: 'bg-white',
       iconBg: 'bg-red-100',
       iconText: 'text-red-600'
+    },
+    purple: {
+      bg: 'bg-white',
+      iconBg: 'bg-purple-100',
+      iconText: 'text-purple-600'
     }
   };
 
