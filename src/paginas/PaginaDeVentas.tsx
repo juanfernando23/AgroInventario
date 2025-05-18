@@ -26,10 +26,10 @@ const SalesPage: React.FC = () => {
   // Usuario simulado - En una app real, obtendríamos esto de un contexto de autenticación
   const currentUser = { id: '1', name: 'Admin Usuario' };
 
-  // Manejar la confirmación de una nueva venta
-  // Cargar ventas al cambiar a la vista de historial
+  // Manejar la confirmación de una nueva venta  // Cargar ventas al cambiar a la vista de historial
   useEffect(() => {
     if (view === 'history') {
+      // Asegurarnos de cargar las ventas actualizadas cada vez que se muestre el historial
       loadSales();
     }
   }, [view, loadSales]);
