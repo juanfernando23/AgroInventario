@@ -171,15 +171,15 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredSales.length === 0 ? (
+            <tbody className="bg-white divide-y divide-gray-200">              {filteredSales.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-4 text-center text-sm text-gray-500">
                     No se encontraron ventas que coincidan con los filtros.
                   </td>
                 </tr>
               ) : (
-                filteredSales.map((sale) => (
+                // Nos aseguramos de que las ventas estén ordenadas por fecha descendente (más recientes primero)
+                [...filteredSales].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((sale) => (
                   <tr key={sale.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       #{sale.id}

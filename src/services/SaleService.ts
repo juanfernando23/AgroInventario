@@ -9,18 +9,23 @@ const API_URL = 'http://localhost:3001/api/sales';
 export const useSaleService = () => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Cargar todas las ventas
+  const [error, setError] = useState<string | null>(null);  // Cargar todas las ventas
   const loadSales = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const res = await fetch(API_URL);
+      // Añadimos un parámetro sort=desc para asegurarnos de que el servidor devuelva las ventas ordenadas
+      const res = await fetch(`${API_URL}?sort=desc`);
       if (!res.ok) throw new Error('No se pudo obtener la lista de ventas');
       const data = await res.json();
-      setSales(data);
+      
+      // Ordenar las ventas con las más recientes primero (doble seguridad)
+      const sortedSales = [...data].sort((a, b) => {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
+      
+      setSales(sortedSales);
     } catch (err: any) {
       setError('Error al cargar ventas: ' + (err.message || 'Error desconocido'));
       console.error('Error al cargar ventas:', err);
@@ -61,10 +66,10 @@ export const useSaleService = () => {
           // Si no es JSON, intentamos obtener el texto
           errorMsg = await res.text() || `Error del servidor: ${res.status}`;
         }
-        throw new Error(errorMsg);
-      }
+        throw new Error(errorMsg);      }
       
       const newSale = await res.json();
+      // Añadir la nueva venta al principio de la lista para mantener el orden cronológico inverso
       setSales((prev) => [newSale, ...prev]);
       return newSale;
     } catch (err: any) {
@@ -93,7 +98,6 @@ export const useSaleService = () => {
       setLoading(false);
     }
   };
-
   // Buscar ventas con filtros
   const searchSales = async (filters: {
     customer?: string;
@@ -103,10 +107,12 @@ export const useSaleService = () => {
     setLoading(true);
     setError(null);
     try {
-      // Construir parámetros de consulta      const params = new URLSearchParams();
-      if (filters.customer) params.append('customer', filters.customer);
+      // Construir parámetros de consulta
+      const params = new URLSearchParams();      if (filters.customer) params.append('customer', filters.customer);
       if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
       if (filters.dateTo) params.append('dateTo', filters.dateTo);
+      // Siempre añadir el parámetro sort=desc para asegurarnos de que el servidor devuelva las ventas más recientes primero
+      params.append('sort', 'desc');
       
       const queryString = params.toString();
       const url = queryString ? `${API_URL}/search?${queryString}` : `${API_URL}`;
@@ -114,14 +120,20 @@ export const useSaleService = () => {
       if (!res.ok) throw new Error('Error al buscar ventas');
       
       const data = await res.json();
-      setSales(data);
+      
+      // Ordenar las ventas con las más recientes primero
+      const sortedSales = [...data].sort((a, b) => {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
+      
+      setSales(sortedSales);
     } catch (err: any) {
       setError('Error al buscar ventas: ' + (err.message || 'Error desconocido'));
       console.error('Error al buscar ventas:', err);
     } finally {
       setLoading(false);
-    }  };
-
+    }
+  };
   // Obtener ventas recientes
   const getRecentSales = async (limit: number = 5): Promise<Sale[]> => {
     setLoading(true);
@@ -130,7 +142,13 @@ export const useSaleService = () => {
       const res = await fetch(`${API_URL}/recent?limit=${limit}`);
       if (!res.ok) throw new Error('No se pudieron obtener las ventas recientes');
       const data = await res.json();
-      return data;
+      
+      // Ordenar las ventas con las más recientes primero
+      const sortedSales = [...data].sort((a, b) => {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
+      
+      return sortedSales;
     } catch (err: any) {
       setError('Error al cargar ventas recientes: ' + (err.message || 'Error desconocido'));
       console.error('Error al cargar ventas recientes:', err);

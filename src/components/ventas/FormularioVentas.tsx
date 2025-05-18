@@ -14,9 +14,8 @@ interface SalesFormProps {
 }
 
 const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [customer, setCustomer] = useState('');
-  const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
+  const [searchTerm, setSearchTerm] = useState('');  const [customer, setCustomer] = useState('');
+  // Ya no usaremos la fecha como un campo editable, solo como valor inicial
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
   const [estado, setEstado] = useState<string>('completada');
 
@@ -26,25 +25,40 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
         p.sku.toLowerCase().includes(searchTerm.toLowerCase())
       ).slice(0, 5)
     : [];
-
   const handleAddToCart = (product: Product) => {
     // Check if product already exists in cart
     const existingItem = cartItems.find(item => item.productId === product.id);
     
     if (existingItem) {
-      // Update quantity if already in cart
-      setCartItems(
-        cartItems.map(item => 
-          item.productId === product.id 
-            ? { 
-                ...item, 
-                quantity: item.quantity + 1,
-                subtotal: (item.quantity + 1) * item.price 
-              } 
-            : item
-        )
-      );
+      // Verificar si hay suficiente stock para añadir otro producto
+      const productInStock = products.find(p => p.id === product.id);
+      const currentInCart = existingItem.quantity;
+      
+      // Solo permitir añadir si hay suficiente stock
+      if (productInStock && currentInCart < productInStock.stock) {
+        // Update quantity if already in cart
+        setCartItems(
+          cartItems.map(item => 
+            item.productId === product.id 
+              ? { 
+                  ...item, 
+                  quantity: item.quantity + 1,
+                  subtotal: (item.quantity + 1) * item.price 
+                } 
+              : item
+          )
+        );
+      } else {
+        // Mostrar alerta si no hay suficiente stock
+        alert(`No hay suficiente stock disponible para ${product.name}. Stock disponible: ${productInStock?.stock || 0}`);
+      }
     } else {
+      // Verificar que haya stock antes de añadir
+      if (product.stock <= 0) {
+        alert(`No hay stock disponible para ${product.name}`);
+        return;
+      }
+      
       // Add new item to cart
       setCartItems([
         ...cartItems,
@@ -62,9 +76,17 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
     // Clear search
     setSearchTerm('');
   };
-
   const handleQuantityChange = (productId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
+    
+    // Verificar stock disponible para este producto
+    const product = products.find(p => p.id === productId);
+    
+    // Si el producto existe, verificar el stock disponible
+    if (product && newQuantity > product.stock) {
+      // Limitar la cantidad al stock disponible
+      newQuantity = product.stock;
+    }
     
     setCartItems(
       cartItems.map(item => 
@@ -84,13 +106,15 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
   };
 
   const totalAmount = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
-
   const handleConfirmSale = () => {
     if (cartItems.length === 0) return;
     
+    // Usar la fecha y hora actual para la venta
+    const currentDateTime = new Date().toISOString();
+    
     onConfirmSale({
       customer,
-      date: saleDate,
+      date: currentDateTime, // Usar fecha y hora actual
       items: cartItems,
       total: totalAmount,
       estado
@@ -99,14 +123,11 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
     // Reset form
     setCartItems([]);
     setCustomer('');
-    setSaleDate(new Date().toISOString().split('T')[0]);
     setEstado('completada');
   };
-
   const handleCancelSale = () => {
     setCartItems([]);
     setCustomer('');
-    setSaleDate(new Date().toISOString().split('T')[0]);
     setEstado('completada');
   };
 
@@ -141,17 +162,28 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
                   <div>
                     <div className="font-medium text-gray-900">{product.name}</div>
                     <div className="text-sm text-gray-500">
-                      SKU: {product.sku} | Stock: {product.stock} {product.unit}
+                      SKU: {product.sku} | Stock: 
+                      <span className={
+                        product.stock <= 0 ? "text-red-600 font-bold ml-1" : 
+                        product.stock <= 5 ? "text-orange-600 font-semibold ml-1" : 
+                        "text-green-600 ml-1"
+                      }>
+                        {product.stock}
+                      </span> {product.unit}
                     </div>
                     <div className="text-sm font-medium">${product.price.toFixed(2)}</div>
                   </div>
                   <button
                     type="button"
-                    className="ml-4 inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500 transition-colors duration-200"
+                    className={`ml-4 inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
+                      product.stock <= 0 
+                        ? "bg-gray-400 cursor-not-allowed" 
+                        : "bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-green-500 transition-colors duration-200"
+                    }`}
                     onClick={() => handleAddToCart(product)}
                     disabled={product.stock <= 0}
                   >
-                    Añadir
+                    {product.stock <= 0 ? "Sin Stock" : "Añadir"}
                   </button>
                 </div>
               ))
@@ -204,8 +236,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{item.productName}</div>
                         <div className="text-sm text-gray-500">{item.productSku}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      </td>                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <button
                             onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
@@ -216,16 +247,29 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
                           <input
                             type="number"
                             min="1"
+                            max={products.find(p => p.id === item.productId)?.stock || 1}
                             value={item.quantity}
                             onChange={(e) => handleQuantityChange(item.productId, parseInt(e.target.value) || 1)}
                             className="mx-2 border-2 rounded w-16 text-center p-1 h-8"
                           />
                           <button
                             onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
-                            className="text-gray-500 focus:outline-none focus:text-gray-600 p-1"
+                            className={`text-gray-500 focus:outline-none focus:text-gray-600 p-1 ${
+                              item.quantity >= (products.find(p => p.id === item.productId)?.stock || 0) 
+                                ? "opacity-50 cursor-not-allowed" 
+                                : ""
+                            }`}
+                            disabled={item.quantity >= (products.find(p => p.id === item.productId)?.stock || 0)}
                           >
                             +
                           </button>
+                        </div>
+                        <div className={`text-xs mt-1 ${
+                          ((products.find(p => p.id === item.productId)?.stock || 0) <= 5) 
+                            ? "text-red-500 font-semibold" 
+                            : "text-gray-500"
+                        }`}>
+                          Stock disponible: {(products.find(p => p.id === item.productId)?.stock || 0)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -268,19 +312,19 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
                   />
                 </div>
               </div>
-              
-              <div className="sm:col-span-3">
+                <div className="sm:col-span-3">
                 <label htmlFor="saleDate" className="block text-sm font-medium text-gray-700 text-left mb-2">
                   Fecha de Venta
                 </label>
                 <div>
                   <input
-                    type="date"
+                    type="text"
                     id="saleDate"
-                    value={saleDate}
-                    onChange={(e) => setSaleDate(e.target.value)}
-                    className="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
+                    value={new Date().toLocaleString('es-ES')}
+                    readOnly
+                    className="shadow-sm bg-gray-50 block w-full sm:text-sm border-2 border-gray-300 rounded-md p-3 h-10"
                   />
+                  <p className="mt-1 text-xs text-gray-500">Se registrará la fecha y hora actual al confirmar la venta</p>
                 </div>
               </div>
               
