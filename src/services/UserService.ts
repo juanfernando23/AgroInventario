@@ -12,32 +12,28 @@ const mockUsers: User[] = [
     name: 'Administrador',
     email: 'admin@agroinventario.com',
     role: 'admin',
-    status: 'active',
-    lastLogin: new Date().toISOString()
+    status: 'active'
   },
   {
     id: '2',
     name: 'María López',
     email: 'maria@agroinventario.com',
     role: 'employee',
-    status: 'active',
-    lastLogin: new Date().toISOString()
+    status: 'active'
   },
   {
     id: '3',
     name: 'Juan Pérez',
     email: 'juan@agroinventario.com',
     role: 'employee',
-    status: 'active',
-    lastLogin: new Date().toISOString()
+    status: 'active'
   },
   {
     id: '4',
     name: 'Ana Rodríguez',
     email: 'ana@agroinventario.com',
     role: 'employee',
-    status: 'inactive',
-    lastLogin: new Date().toISOString()
+    status: 'inactive'
   }
 ];
 
@@ -119,14 +115,12 @@ export const useUserService = () => {
       
       // Si hay un error de conexión, simular la adición de un usuario
       if (err.message && err.message.includes('Failed to fetch')) {
-        console.log('Usando simulación para registrar usuario debido a error de conexión');
-        const mockNewUser: User = {
+        console.log('Usando simulación para registrar usuario debido a error de conexión');          const mockNewUser: User = {
           id: Date.now().toString(), // Generar un ID único basado en timestamp
           name: userData.name,
           email: userData.email,
           role: userData.role,
-          status: userData.status,
-          lastLogin: new Date().toISOString()
+          status: userData.status
         };
         
         setUsers((prev) => [...prev, mockNewUser].sort((a, b) => 
@@ -217,11 +211,9 @@ export const useUserService = () => {
         
         // Buscar el usuario en los usuarios actuales
         const userIndex = users.findIndex(u => u.id === id);
-        if (userIndex >= 0) {
-          const updatedUser: User = { 
+        if (userIndex >= 0) {          const updatedUser: User = { 
             ...users[userIndex], 
-            ...userData,
-            lastLogin: users[userIndex].lastLogin
+            ...userData
           };
           
           // Actualizar la lista de usuarios

@@ -18,13 +18,12 @@ const UsersPage: React.FC = () => {
       navigate('/dashboard');
     }
   }, [isAdmin, navigate]);
-
   // Cargar usuarios al montar
   useEffect(() => {
     loadUsers();
   }, [loadUsers]);
 
-  const handleAddUser = async (userData: Omit<User, 'id' | 'lastLogin'>) => {
+  const handleAddUser = async (userData: Omit<User, 'id'>) => {
     try {
       await addUser(userData);
     } catch (err) {
