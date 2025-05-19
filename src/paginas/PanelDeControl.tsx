@@ -2,9 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { 
   Package2, 
   DollarSign, 
-  AlertTriangle, 
-  ArrowRightLeft,
-  ShoppingCart
+  AlertTriangle
 } from 'lucide-react';
 import StatCard from '../components/comun/TarjetaEstadisticas';
 import RecentList from '../components/dashboard/ListaReciente';
@@ -12,21 +10,17 @@ import MainLayout from '../components/estructura/principal';
 import { mockProducts } from '../data/SimulacionDatos';
 import { useMovementService } from '../services/MovementService';
 import { useProductService } from '../services/ProductService';
-import { useSaleService } from '../services/SaleService';
 import { Movement, Product } from '../types';
 
 const DashboardPage: React.FC = () => {
   const { getRecentMovements } = useMovementService();
   const { products } = useProductService();
-  const { getTodaySales, getRecentSales } = useSaleService();
   const [recentMovements, setRecentMovements] = useState<Movement[]>([]);
-  const [todayMovementsCount, setTodayMovementsCount] = useState<number>(0);
-  const [todaySalesCount, setTodaySalesCount] = useState<number>(0);
   const [recentProducts, setRecentProducts] = useState<Product[]>([]);
-  const [loadingSales, setLoadingSales] = useState<boolean>(true);
   const [loadingMovements, setLoadingMovements] = useState<boolean>(true);
-  const [salesError, setSalesError] = useState<string | null>(null);
-  const [movementsError, setMovementsError] = useState<string | null>(null);  useEffect(() => {
+  const [movementsError, setMovementsError] = useState<string | null>(null);
+
+  useEffect(() => {
     const loadRecentMovements = async () => {
       try {
         setLoadingMovements(true);
@@ -35,29 +29,10 @@ const DashboardPage: React.FC = () => {
         
         const movements = await getRecentMovements(5);
         setRecentMovements(movements);
-        
-        // Calcular movimientos de hoy usando zona horaria de Colombia
-        // La fecha actual en la zona horaria de Colombia
-        const colombiaDate = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
-        const colombiaDateStr = colombiaDate.toISOString().split('T')[0]; // formato YYYY-MM-DD
-        
-        console.log(`[PanelDeControl] Fecha en Colombia: ${colombiaDateStr}`);
-        
-        // Filtrar movimientos por la fecha de Colombia
-        const todayCount = movements.filter(movement => {
-          const movementDate = new Date(movement.date);
-          const colombiaMovementDate = new Date(movementDate.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
-          const formattedMovementDate = colombiaMovementDate.toISOString().split('T')[0];
-          return formattedMovementDate === colombiaDateStr;
-        }).length;
-        
-        setTodayMovementsCount(todayCount);
-        console.log(`[PanelDeControl] Movimientos de hoy: ${todayCount}`);
       } catch (error: any) {
         console.error('[PanelDeControl] Error al cargar movimientos recientes:', error);
         setMovementsError(error.message || 'Error al cargar movimientos');
         setRecentMovements([]);
-        setTodayMovementsCount(0);
       } finally {
         setLoadingMovements(false);
       }
@@ -73,39 +48,7 @@ const DashboardPage: React.FC = () => {
     
     // Limpiar el intervalo al desmontar el componente
     return () => clearInterval(interval);
-  }, [getRecentMovements]);  // Cargar ventas recientes y calcular ventas del día
-  useEffect(() => {
-    const loadRecentSales = async () => {
-      try {
-        setLoadingSales(true);
-        setSalesError(null);
-        console.log('[PanelDeControl] Cargando ventas de hoy...');
-        
-        // Usar la función para obtener directamente las ventas de hoy con timezone de Colombia
-        const todayCount = await getTodaySales();
-        setTodaySalesCount(todayCount);
-        console.log(`[PanelDeControl] Ventas de hoy cargadas: ${todayCount}`);
-      } catch (error: any) {
-        console.error('[PanelDeControl] Error al cargar ventas recientes:', error);
-        setSalesError(error.message || 'Error al cargar ventas');
-        setTodaySalesCount(0);
-      } finally {
-        setLoadingSales(false);
-      }
-    };
-    
-    // Cargar inmediatamente al iniciar
-    loadRecentSales();
-    
-    // Configurar actualización automática cada 2 minutos (120000 ms)
-    const interval = setInterval(() => {
-      console.log('[PanelDeControl] Actualizando ventas de hoy automáticamente...');
-      loadRecentSales();
-    }, 120000);
-    
-    // Limpiar el intervalo al desmontar el componente
-    return () => clearInterval(interval);
-  }, [getTodaySales]);
+  }, [getRecentMovements]);
 
   useEffect(() => {
     // Usar products del servicio si están disponibles, o mockProducts como respaldo
@@ -153,8 +96,7 @@ const DashboardPage: React.FC = () => {
     <MainLayout>
       <div>
         <h1 className="text-4xl font-bold text-gray-900 mb-6">Dashboard</h1>
-            {/* Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 mb-6 md:mb-8">
+            {/* Statistics Cards */}        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 md:mb-8">
           <StatCard 
             title="Total de Productos"
             value={totalProducts}
@@ -174,20 +116,7 @@ const DashboardPage: React.FC = () => {
             value={lowStockProducts}
             icon={<AlertTriangle className="h-6 w-6" />}
             color={lowStockProducts > 0 ? "red" : "green"}
-            delay={300}          />          <StatCard 
-            title="Ventas de Hoy"
-            value={loadingSales ? "..." : todaySalesCount}
-            subtext={salesError ? `Error: ${salesError}` : ""}
-            icon={<ShoppingCart className="h-6 w-6" />}
-            color={salesError ? "red" : "purple"}
-            delay={350}
-          />          <StatCard 
-            title="Movimientos de Hoy"
-            value={loadingMovements ? "..." : todayMovementsCount}
-            subtext={movementsError ? `Error: ${movementsError}` : ""}
-            icon={<ArrowRightLeft className="h-6 w-6" />}
-            color={movementsError ? "red" : "orange"}
-            delay={400}
+            delay={300}
           />
         </div>
         
