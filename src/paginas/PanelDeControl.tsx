@@ -140,7 +140,7 @@ const DashboardPage: React.FC = () => {
           
           {/* Recent Movements */}
           <RecentList 
-            title="�ltimos Movimientos Registrados" 
+            title="Últimos Movimientos Registrados" 
             delay={600}
             isLoading={movementsLoading}
             error={movementsError}
