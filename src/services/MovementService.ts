@@ -143,19 +143,17 @@ export const useMovementService = () => {
       });
       
       if (!res.ok) {
-        throw new Error(`Error del servidor: ${res.status} ${res.statusText}`);
+        console.warn(`Error del servidor: ${res.status} ${res.statusText}`);
+        // En caso de error del servidor, usar datos en memoria o simulados
+        return movements.length > 0 ? movements.slice(0, limit) : mockMovements.slice(0, limit);
       }
       
       const data = await res.json();
-      
-      // Agregar tiempo de carga artificialmente bajo para casos de prueba
-      // return new Promise(resolve => setTimeout(() => resolve(data), 500));
-      
       return data;
     } catch (err) {
       console.error('Error al obtener movimientos recientes:', err);
-      // En caso de error, devolvemos datos simulados
-      return mockMovements.slice(0, limit);
+      // En caso de error, usar datos en memoria o simulados como respaldo
+      return movements.length > 0 ? movements.slice(0, limit) : mockMovements.slice(0, limit);
     }
   };
 
