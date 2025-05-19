@@ -4,7 +4,7 @@ export interface User {
   email: string;
   role: 'admin' | 'employee';
   status: 'active' | 'inactive';
-  lastLogin: string;
+  lastLogin?: string;
 }
 
 export interface Product {

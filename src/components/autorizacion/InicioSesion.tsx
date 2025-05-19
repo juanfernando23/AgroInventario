@@ -48,8 +48,8 @@ const LoginForm: React.FC = () => {
                     </svg>
                   </div>                  <div className="ml-3">
                     <h3 className="text-sm font-medium text-red-800">Error de inicio de sesión</h3>
-                    <p className="mt-2 text-sm text-red-700">{error.includes('Credenciales inválidas') ? 'Credenciales inválidas o usuario inactivo' : error}</p>
-                    {error.includes('inactivo') && (
+                    <p className="mt-2 text-sm text-red-700">{error}</p>
+                    {error && error.includes('inactivo') && (
                       <p className="mt-1 text-sm text-red-700">Por favor contacte al administrador para activar su cuenta.</p>
                     )}
                   </div>

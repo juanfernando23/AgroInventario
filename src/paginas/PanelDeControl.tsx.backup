@@ -1,4 +1,3 @@
-// filepath: c:\Users\jball\OneDrive\Documentos\Programacion web\agroinventario2\main\AgroInventario\src\paginas\PanelDeControl.tsx
 import React, { useEffect, useState } from 'react';
 import { 
   Package2, 
@@ -19,9 +18,8 @@ const DashboardPage: React.FC = () => {
   const [recentMovements, setRecentMovements] = useState<Movement[]>([]);
   const [recentProducts, setRecentProducts] = useState<Product[]>([]);
   const [movementsError, setMovementsError] = useState<string | null>(null);
-
   useEffect(() => {
-    // Obtener los movimientos m�s recientes del estado general de movements
+    // Obtener los movimientos más recientes del estado general de movements
     if (movements && movements.length > 0) {
       // Ordenar por fecha de forma descendente y tomar los 5 primeros
       const sortedMovements = [...movements]
@@ -34,7 +32,7 @@ const DashboardPage: React.FC = () => {
   }, [movements]);
 
   useEffect(() => {
-    // Usar products del servicio si est�n disponibles, o mockProducts como respaldo
+    // Usar products del servicio si están disponibles, o mockProducts como respaldo
     const availableProducts = products.length > 0 ? products : mockProducts;
     const recent = [...availableProducts]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -75,14 +73,11 @@ const DashboardPage: React.FC = () => {
       default: return 'bg-gray-100 text-gray-800';
     }
   };
-  
   return (
     <MainLayout>
       <div>
         <h1 className="text-4xl font-bold text-gray-900 mb-6">Dashboard</h1>
-        
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 md:mb-8">
+            {/* Statistics Cards */}        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 md:mb-8">
           <StatCard 
             title="Total de Productos"
             value={totalProducts}
@@ -107,8 +102,7 @@ const DashboardPage: React.FC = () => {
         </div>
         
         {/* Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Products */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">          {/* Recent Products */}
           <RecentList title="Productos Agregados Recientemente" delay={500}>
             <div className="divide-y divide-gray-200">
               {recentProducts.map(product => (
@@ -137,9 +131,7 @@ const DashboardPage: React.FC = () => {
               ))}
             </div>
           </RecentList>
-          
-          {/* Recent Movements */}
-          <RecentList 
+            {/* Recent Movements */}          <RecentList 
             title="Últimos Movimientos Registrados" 
             delay={600}
             isLoading={movementsLoading}
@@ -171,6 +163,7 @@ const DashboardPage: React.FC = () => {
                   No hay movimientos registrados recientemente
                 </div>
               )}
+            </div>
             </div>
           </RecentList>
         </div>

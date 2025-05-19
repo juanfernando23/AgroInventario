@@ -40,73 +40,33 @@ export const useAuthService = () => {
       setError(null);
       setLoading(true);
       
-      // Intenta autenticar con el servidor real
-      try {
-        const response = await fetch(`${AUTH_URL}/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password }),
-        });
+      const response = await fetch(`${AUTH_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+        setToken(data.token);
+        localStorage.setItem(TOKEN_KEY, data.token);
+        localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+        return true;
+      } else {
+        const errorData = await response.json().catch(() => ({ 
+          error: 'Error de autenticación',
+          errorType: 'connection_error' 
+        }));
         
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
-          setToken(data.token);
-          localStorage.setItem(TOKEN_KEY, data.token);
-          localStorage.setItem(USER_KEY, JSON.stringify(data.user));
-          return true;
-        } else {
-          // Si hay un error con el servidor real, usamos usuario mock para desarrollo
-          console.warn('Error de autenticación con el servidor, usando modo de prueba');
-          // Si el usuario ingresó las credenciales de admin que sabemos que existen
-          if (email === 'admin@agroinventario.com' && password === 'admin123') {
-            const mockUser: User = {
-              id: '1',
-              name: 'Admin Usuario',
-              email: 'admin@agroinventario.com',
-              role: 'admin',
-              status: 'active',
-              lastLogin: new Date().toISOString()
-            };
-            const mockToken = 'mock-token-123456789';
-            setUser(mockUser);
-            setToken(mockToken);
-            localStorage.setItem(TOKEN_KEY, mockToken);
-            localStorage.setItem(USER_KEY, JSON.stringify(mockUser));
-            return true;
-          } else {
-            const errorData = await response.json().catch(() => ({ message: 'Error de autenticación' }));
-            setError(errorData.message || 'Credenciales inválidas');
-            return false;
-          }
-        }
-      } catch (err) {
-        console.error('Error de conexión con el servidor de autenticación:', err);
-        // En caso de error de conexión, usar el usuario mock si las credenciales coinciden
-        if (email === 'admin@agroinventario.com' && password === 'admin123') {
-          const mockUser: User = {
-            id: '1',
-            name: 'Admin Usuario',
-            email: 'admin@agroinventario.com',
-            role: 'admin',
-            status: 'active',
-            lastLogin: new Date().toISOString()
-          };
-          const mockToken = 'mock-token-123456789';
-          setUser(mockUser);
-          setToken(mockToken);
-          localStorage.setItem(TOKEN_KEY, mockToken);
-          localStorage.setItem(USER_KEY, JSON.stringify(mockUser));
-          return true;
-        } else {
-          setError('Credenciales inválidas o problemas de conexión');
-          return false;
-        }
+        setError(errorData.error || 'Credenciales inválidas');
+        return false;
       }
     } catch (err) {
-      setError('Error durante el inicio de sesión');
+      console.error('Error de conexión con el servidor de autenticación:', err);
+      setError('Error de conexión con el servidor. Verifica tu conexión a internet.');
       return false;
     } finally {
       setLoading(false);

@@ -6,7 +6,7 @@ import UserForm from './FormularioUsuarios';
 
 interface UsersListProps {
   users: User[];
-  onAddUser: (user: Omit<User, 'id' | 'lastLogin'>) => void;
+  onAddUser: (user: Omit<User, 'id'>) => void;
   onEditUser: (id: string, user: Partial<User>) => void;
   onDeleteUser: (id: string) => void;
 }

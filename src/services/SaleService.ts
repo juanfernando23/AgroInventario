@@ -208,30 +208,47 @@ export const useSaleService = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Obtener el número de ventas de hoy
+  };  // Obtener el número de ventas de hoy
   const getTodaySales = async (): Promise<number> => {
     try {
-      const today = new Date();
-      const formattedDate = today.toISOString().split('T')[0]; // 'YYYY-MM-DD'
-      
-      // Obtener todas las ventas
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error('No se pudieron obtener las ventas');
-      
-      const data: Sale[] = await res.json();
-      
-      // Filtrar ventas de hoy
-      const todaySales = data.filter(sale => {
-        const saleDate = new Date(sale.date).toISOString().split('T')[0];
-        return saleDate === formattedDate;
+      // Usar el endpoint específico para ventas de hoy (con zona horaria de Colombia)
+      const res = await fetch(`${API_URL}/today/count`, {
+        // Agregar caché de 30 segundos para optimizar múltiples solicitudes
+        cache: 'no-cache', // Deshabilitar caché para asegurar datos actualizados
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
       });
       
-      return todaySales.length;
+      if (!res.ok) {
+        throw new Error(`Error del servidor: ${res.status} ${res.statusText}`);
+      }
+      
+      const data = await res.json();
+      return data.count;
     } catch (err: any) {
-      console.error('Error al obtener ventas de hoy:', err);
-      return 0;
+      console.error('[SaleService] Error al obtener ventas de hoy desde API:', err);
+      
+      // Si falla la conexión con el servidor, intentar calcular localmente
+      try {
+        // Obtener la fecha actual en la zona horaria de Colombia (UTC-5)
+        const now = new Date();
+        const colombiaDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+        const colombiaDateStr = colombiaDate.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+        
+        // Filtrar ventas por la fecha de Colombia
+        const todaySales = sales.filter(sale => {
+          // Convertir la fecha de la venta a la zona horaria de Colombia
+          const saleDate = new Date(sale.date);
+          const colombiaSaleDate = new Date(saleDate.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+          const formattedSaleDate = colombiaSaleDate.toISOString().split('T')[0];
+          
+          return formattedSaleDate === colombiaDateStr;
+        });
+        
+        return todaySales.length;
+      } catch (localErr) {
+        console.error('[SaleService] Error al calcular ventas localmente:', localErr);
+        return 0;
+      }
     }
   };
   return {

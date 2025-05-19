@@ -136,13 +136,24 @@ export const useMovementService = () => {
   };  // Obtener los movimientos recientes para el dashboard
   const getRecentMovements = async (limit: number = 5): Promise<Movement[]> => {
     try {
-      const res = await fetch(`${API_URL}/recent?limit=${limit}`);
-      if (!res.ok) throw new Error('No se pudieron obtener los movimientos recientes');
-      return await res.json();
+      // Usar no-cache para asegurar datos frescos
+      const res = await fetch(`${API_URL}/recent?limit=${limit}`, {
+        cache: 'no-cache',
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' }
+      });
+      
+      if (!res.ok) {
+        console.warn(`Error del servidor: ${res.status} ${res.statusText}`);
+        // En caso de error del servidor, usar datos en memoria o simulados
+        return movements.length > 0 ? movements.slice(0, limit) : mockMovements.slice(0, limit);
+      }
+      
+      const data = await res.json();
+      return data;
     } catch (err) {
       console.error('Error al obtener movimientos recientes:', err);
-      // En caso de error, devolvemos datos simulados
-      return mockMovements.slice(0, limit);
+      // En caso de error, usar datos en memoria o simulados como respaldo
+      return movements.length > 0 ? movements.slice(0, limit) : mockMovements.slice(0, limit);
     }
   };
 
