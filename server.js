@@ -183,6 +183,10 @@ app.get('/api/movements/search', async (req, res) => {
 app.get('/api/movements/recent', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit || '5');
+    
+    // Añadir cabeceras para mejorar el rendimiento
+    res.set('Cache-Control', 'private, max-age=30'); // Cachear por 30 segundos
+    
     const movements = await MovementRepository.getRecent(limit);
     res.json(movements);
   } catch (error) {
@@ -411,6 +415,62 @@ app.delete('/api/users/:id', async (req, res) => {
   } catch (error) {
     console.error(`Error al eliminar usuario con ID ${req.params.id}:`, error);
     res.status(500).json({ error: 'Error al eliminar el usuario' });
+  }
+});
+
+// Endpoint para obtener las ventas del día de hoy
+app.get('/api/sales/today', async (req, res) => {
+  try {
+    // Crear objeto de fecha para Colombia (UTC-5)
+    const now = new Date();
+    // Ajustar a la zona horaria de Colombia (UTC-5)
+    const colombiaDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+    
+    // Obtener año, mes, día de la fecha en Colombia
+    const year = colombiaDate.getFullYear();
+    const month = colombiaDate.getMonth();
+    const day = colombiaDate.getDate();
+    
+    // Crear fecha de inicio (00:00:00) y fin (23:59:59) para el día de hoy en Colombia
+    const startOfDay = new Date(Date.UTC(year, month, day, 5, 0, 0)); // 00:00:00 en Colombia es 05:00:00 en UTC
+    const endOfDay = new Date(Date.UTC(year, month, day, 5 + 24, 0, 0)); // 00:00:00 del día siguiente (inclusivo)
+    
+    // Consultar ventas de hoy - optimizando la consulta
+    const result = await query(`
+      SELECT * FROM sales 
+      WHERE date >= $1 AND date < $2
+      ORDER BY date DESC
+    `, [startOfDay.toISOString(), endOfDay.toISOString()]);
+    
+    // Mapear resultados
+    const sales = result.rows.map(row => ({
+      id: row.id.toString(),
+      date: row.date.toISOString(),
+      customer: row.customer || undefined,
+      userId: row.user_id,
+      userName: row.user_name,
+      total: parseFloat(row.total),
+      estado: row.estado_venta || 'completada'
+    }));
+    
+    res.json(sales);
+  } catch (error) {
+    console.error('Error al obtener ventas de hoy:', error);
+    res.status(500).json({ error: 'Error al obtener ventas de hoy' });
+  }
+});
+
+// Endpoint para obtener el conteo de ventas de hoy
+app.get('/api/sales/today/count', async (req, res) => {
+  try {
+    // Añadir cabeceras para mejorar rendimiento
+    res.set('Cache-Control', 'private, max-age=30'); // Cachear por 30 segundos
+    
+    const count = await SaleRepository.getTodaySalesCount();
+    res.json({ count });
+  } catch (error) {
+    console.error('Error al obtener el conteo de ventas de hoy:', error);
+    res.status(500).json({ error: 'Error al obtener el conteo de ventas de hoy' });
   }
 });
 

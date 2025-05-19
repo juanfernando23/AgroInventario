@@ -230,6 +230,36 @@ class SaleRepository {
       console.error('Error al obtener ventas recientes:', error);
       throw error;
     }
+  }  // Obtener el conteo de ventas de hoy (considerando zona horaria de Colombia)
+  static async getTodaySalesCount() {
+    try {
+      // Crear objeto de fecha para Colombia (UTC-5)
+      const now = new Date();
+      // Ajustar a la zona horaria de Colombia (UTC-5)
+      const colombiaDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+      
+      // Obtener año, mes, día de la fecha en Colombia
+      const year = colombiaDate.getFullYear();
+      const month = colombiaDate.getMonth();
+      const day = colombiaDate.getDate();
+      
+      // Crear fecha de inicio (00:00:00) y fin (23:59:59) para el día de hoy en Colombia
+      const startOfDay = new Date(Date.UTC(year, month, day, 5, 0, 0)); // 00:00:00 en Colombia es 05:00:00 en UTC
+      const endOfDay = new Date(Date.UTC(year, month, day, 5 + 24, 0, 0)); // 00:00:00 del día siguiente (inclusivo)
+      
+      // Eliminar logs innecesarios que podrían ralentizar la carga
+      // Consultar el número de ventas de hoy - optimizando la consulta
+      const result = await query(`
+        SELECT COUNT(*) as count FROM sales 
+        WHERE date >= $1 AND date < $2
+      `, [startOfDay.toISOString(), endOfDay.toISOString()]);
+      
+      const count = parseInt(result.rows[0].count, 10);
+      return count;
+    } catch (error) {
+      console.error('Error al obtener el conteo de ventas de hoy:', error);
+      throw error;
+    }
   }
 }
 

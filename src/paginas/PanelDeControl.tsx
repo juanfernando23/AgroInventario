@@ -18,46 +18,93 @@ import { Movement, Product } from '../types';
 const DashboardPage: React.FC = () => {
   const { getRecentMovements } = useMovementService();
   const { products } = useProductService();
-  const { getRecentSales, getTodaySales } = useSaleService();
+  const { getTodaySales, getRecentSales } = useSaleService();
   const [recentMovements, setRecentMovements] = useState<Movement[]>([]);
   const [todayMovementsCount, setTodayMovementsCount] = useState<number>(0);
   const [todaySalesCount, setTodaySalesCount] = useState<number>(0);
   const [recentProducts, setRecentProducts] = useState<Product[]>([]);
-  useEffect(() => {
+  const [loadingSales, setLoadingSales] = useState<boolean>(true);
+  const [loadingMovements, setLoadingMovements] = useState<boolean>(true);
+  const [salesError, setSalesError] = useState<string | null>(null);
+  const [movementsError, setMovementsError] = useState<string | null>(null);  useEffect(() => {
     const loadRecentMovements = async () => {
       try {
+        setLoadingMovements(true);
+        setMovementsError(null);
+        console.log('[PanelDeControl] Cargando movimientos recientes...');
+        
         const movements = await getRecentMovements(5);
         setRecentMovements(movements);
         
-        // Calcular movimientos de hoy
-        const today = new Date().toDateString();
-        const todayCount = movements.filter(
-          movement => new Date(movement.date).toDateString() === today
-        ).length;
+        // Calcular movimientos de hoy usando zona horaria de Colombia
+        // La fecha actual en la zona horaria de Colombia
+        const colombiaDate = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+        const colombiaDateStr = colombiaDate.toISOString().split('T')[0]; // formato YYYY-MM-DD
+        
+        console.log(`[PanelDeControl] Fecha en Colombia: ${colombiaDateStr}`);
+        
+        // Filtrar movimientos por la fecha de Colombia
+        const todayCount = movements.filter(movement => {
+          const movementDate = new Date(movement.date);
+          const colombiaMovementDate = new Date(movementDate.toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+          const formattedMovementDate = colombiaMovementDate.toISOString().split('T')[0];
+          return formattedMovementDate === colombiaDateStr;
+        }).length;
+        
         setTodayMovementsCount(todayCount);
-      } catch (error) {
-        console.error('Error al cargar movimientos recientes:', error);
+        console.log(`[PanelDeControl] Movimientos de hoy: ${todayCount}`);
+      } catch (error: any) {
+        console.error('[PanelDeControl] Error al cargar movimientos recientes:', error);
+        setMovementsError(error.message || 'Error al cargar movimientos');
         setRecentMovements([]);
         setTodayMovementsCount(0);
+      } finally {
+        setLoadingMovements(false);
       }
     };
     
     loadRecentMovements();
-  }, [getRecentMovements]);
-  // Cargar ventas recientes y calcular ventas del día
+    
+    // Configurar actualización automática cada 3 minutos (180000 ms)
+    const interval = setInterval(() => {
+      console.log('[PanelDeControl] Actualizando movimientos automáticamente...');
+      loadRecentMovements();
+    }, 180000);
+    
+    // Limpiar el intervalo al desmontar el componente
+    return () => clearInterval(interval);
+  }, [getRecentMovements]);  // Cargar ventas recientes y calcular ventas del día
   useEffect(() => {
     const loadRecentSales = async () => {
       try {
-        // Usar la nueva función para obtener directamente las ventas de hoy
+        setLoadingSales(true);
+        setSalesError(null);
+        console.log('[PanelDeControl] Cargando ventas de hoy...');
+        
+        // Usar la función para obtener directamente las ventas de hoy con timezone de Colombia
         const todayCount = await getTodaySales();
         setTodaySalesCount(todayCount);
-      } catch (error) {
-        console.error('Error al cargar ventas recientes:', error);
+        console.log(`[PanelDeControl] Ventas de hoy cargadas: ${todayCount}`);
+      } catch (error: any) {
+        console.error('[PanelDeControl] Error al cargar ventas recientes:', error);
+        setSalesError(error.message || 'Error al cargar ventas');
         setTodaySalesCount(0);
+      } finally {
+        setLoadingSales(false);
       }
     };
     
+    // Cargar inmediatamente al iniciar
     loadRecentSales();
+    
+    // Configurar actualización automática cada 2 minutos (120000 ms)
+    const interval = setInterval(() => {
+      console.log('[PanelDeControl] Actualizando ventas de hoy automáticamente...');
+      loadRecentSales();
+    }, 120000);
+    
+    // Limpiar el intervalo al desmontar el componente
+    return () => clearInterval(interval);
   }, [getTodaySales]);
 
   useEffect(() => {
@@ -127,27 +174,25 @@ const DashboardPage: React.FC = () => {
             value={lowStockProducts}
             icon={<AlertTriangle className="h-6 w-6" />}
             color={lowStockProducts > 0 ? "red" : "green"}
-            delay={300}
-          />
-          <StatCard 
+            delay={300}          />          <StatCard 
             title="Ventas de Hoy"
-            value={todaySalesCount}
+            value={loadingSales ? "..." : todaySalesCount}
+            subtext={salesError ? `Error: ${salesError}` : ""}
             icon={<ShoppingCart className="h-6 w-6" />}
-            color="purple"
+            color={salesError ? "red" : "purple"}
             delay={350}
-          />
-          <StatCard 
+          />          <StatCard 
             title="Movimientos de Hoy"
-            value={todayMovementsCount}
+            value={loadingMovements ? "..." : todayMovementsCount}
+            subtext={movementsError ? `Error: ${movementsError}` : ""}
             icon={<ArrowRightLeft className="h-6 w-6" />}
-            color="orange"
+            color={movementsError ? "red" : "orange"}
             delay={400}
           />
         </div>
         
         {/* Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Products */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">          {/* Recent Products */}
           <RecentList title="Productos Agregados Recientemente" delay={500}>
             <div className="divide-y divide-gray-200">
               {recentProducts.map(product => (
@@ -177,8 +222,12 @@ const DashboardPage: React.FC = () => {
             </div>
           </RecentList>
           
-          {/* Recent Movements */}
-          <RecentList title="Últimos Movimientos Registrados" delay={600}>
+          {/* Recent Movements */}          <RecentList 
+            title="Últimos Movimientos Registrados" 
+            delay={600}
+            isLoading={loadingMovements}
+            error={movementsError}
+          >
             <div className="divide-y divide-gray-200">
               {recentMovements.map(movement => (
                 <div key={movement.id} className="px-6 py-4 hover:bg-gray-50 transition-colors duration-200">
@@ -201,6 +250,11 @@ const DashboardPage: React.FC = () => {
                   </div>
                 </div>
               ))}
+              {recentMovements.length === 0 && !loadingMovements && !movementsError && (
+                <div className="p-6 text-center text-gray-500">
+                  No hay movimientos registrados recientemente
+                </div>
+              )}
             </div>
           </RecentList>
         </div>

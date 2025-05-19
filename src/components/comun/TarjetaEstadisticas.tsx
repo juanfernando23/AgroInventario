@@ -4,6 +4,7 @@ interface StatCardProps {
   title: string;
   value: string | number;
   icon: ReactNode;
+  subtext?: string; // Texto secundario (opcional)
   trend?: { 
     value: number;
     isPositive: boolean;
@@ -16,6 +17,7 @@ const StatCard: React.FC<StatCardProps> = ({
   title,
   value,
   icon,
+  subtext,
   trend,
   color = 'default',
   delay = 0
@@ -72,10 +74,13 @@ const StatCard: React.FC<StatCardProps> = ({
           : 'opacity-0 transform translate-y-4'
       }`}
     >
-      <div className="flex justify-between items-start">
-        <div>
+      <div className="flex justify-between items-start">        <div>
           <p className="text-sm font-medium text-gray-500">{title}</p>
           <p className="mt-2 text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900">{value}</p>
+          
+          {subtext && (
+            <p className="mt-1 text-xs text-gray-500">{subtext}</p>
+          )}
           
           {trend && (
             <div className="mt-2 flex items-center">
