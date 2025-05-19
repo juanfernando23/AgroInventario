@@ -308,7 +308,9 @@ app.post('/api/auth/login', async (req, res) => {
           id: '1',
           name: 'Admin Usuario',
           email: 'admin@agroinventario.com',
-          role: 'admin'
+          role: 'admin',
+          status: 'active',
+          lastLogin: new Date().toISOString()
         },
         token: 'token-simulado-1234567890'
       });
@@ -337,17 +339,50 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-app.post('/api/auth/verify-token', (req, res) => {
-  // Simulación de verificación de token
-  res.json({ 
-    valid: true,
-    user: {
-      id: '1',
-      name: 'Admin Usuario',
-      email: 'admin@agroinventario.com',
-      role: 'admin'
+app.post('/api/auth/verify-token', async (req, res) => {
+  const { token } = req.body;
+  
+  // Validar que se recibió un token
+  if (!token) {
+    return res.status(400).json({ valid: false, error: 'Token no proporcionado' });
+  }
+  
+  try {
+    // Verificar si es el token simulado para el admin hardcodeado
+    if (token === 'token-simulado-1234567890') {
+      return res.json({ 
+        valid: true,
+        user: {
+          id: '1',
+          name: 'Admin Usuario',
+          email: 'admin@agroinventario.com',
+          role: 'admin',
+          status: 'active',
+          lastLogin: new Date().toISOString()
+        }
+      });
     }
-  });
+    
+    // Para otros tokens, extraer el ID de usuario
+    // El formato del token es: token-timestamp-userId
+    const parts = token.split('-');
+    if (parts.length >= 3) {
+      const userId = parts[parts.length - 1];
+      
+      // Buscar el usuario por ID
+      const user = await UserRepository.getById(userId);
+      
+      if (user) {
+        return res.json({ valid: true, user });
+      }
+    }
+    
+    // Si no se encontró el usuario o el token no tiene el formato esperado
+    return res.status(401).json({ valid: false, error: 'Token inválido o expirado' });
+  } catch (error) {
+    console.error('Error al verificar token:', error);
+    return res.status(500).json({ valid: false, error: 'Error al verificar la autenticación' });
+  }
 });
 
 app.post('/api/auth/logout', (req, res) => {
