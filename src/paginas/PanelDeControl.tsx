@@ -8,6 +8,8 @@ import {
 import StatCard from '../components/comun/TarjetaEstadisticas';
 import RecentList from '../components/dashboard/ListaReciente';
 import MainLayout from '../components/estructura/principal';
+import BotonRecomendaciones from '../components/dashboard/BotonRecomendaciones';
+import RecomendacionesIA from '../components/dashboard/RecomendacionesIA';
 import { mockProducts } from '../data/SimulacionDatos';
 import { useMovementService } from '../services/MovementService';
 import { useProductService } from '../services/ProductService';
@@ -20,9 +22,13 @@ const DashboardPage: React.FC = () => {
   const [recentMovements, setRecentMovements] = useState<Movement[]>([]);
   const [recentProducts, setRecentProducts] = useState<Product[]>([]);
   const [movementsError, setMovementsError] = useState<string | null>(null);
+  const [isRecommendationsOpen, setIsRecommendationsOpen] = useState<boolean>(false);
+
+  // Estado para almacenar datos de inventario para análisis de IA
+  const [inventoryAnalysisData, setInventoryAnalysisData] = useState<any>(null);
 
   useEffect(() => {
-    // Obtener los movimientos m�s recientes del estado general de movements
+    // Obtener los movimientos más recientes del estado general de movements
     if (movements && movements.length > 0) {
       // Ordenar por fecha de forma descendente y tomar los 5 primeros
       const sortedMovements = [...movements]
@@ -35,13 +41,60 @@ const DashboardPage: React.FC = () => {
   }, [movements]);
 
   useEffect(() => {
-    // Usar products del servicio si est�n disponibles, o mockProducts como respaldo
+    // Usar products del servicio si están disponibles, o mockProducts como respaldo
     const availableProducts = products.length > 0 ? products : mockProducts;
     const recent = [...availableProducts]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 5);
     setRecentProducts(recent);
+
+    // Preparar datos para el análisis de IA
+    prepareInventoryDataForAnalysis(availableProducts);
   }, [products]);
+
+  // Preparar datos de inventario para análisis con IA
+  const prepareInventoryDataForAnalysis = (products: Product[]) => {
+    // Categorizar productos
+    const lowStockItems = products.filter(p => p.stock <= p.minStock);
+    const topValueItems = [...products].sort((a, b) => (b.price * b.stock) - (a.price * a.stock)).slice(0, 5);
+    
+    // Calcular métricas
+    const totalValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
+    const averageStock = products.reduce((sum, p) => sum + p.stock, 0) / products.length;
+    
+    // Agregar cualquier otro dato relevante
+    const analysisData = {
+      totalProducts: products.length,
+      totalValue,
+      averageStock,
+      lowStockItems: lowStockItems.map(p => ({
+        id: p.id,
+        name: p.name,
+        sku: p.sku,
+        currentStock: p.stock,
+        minStock: p.minStock,
+        unit: p.unit,
+        price: p.price
+      })),
+      topValueItems: topValueItems.map(p => ({
+        id: p.id,
+        name: p.name,
+        sku: p.sku,
+        currentStock: p.stock,
+        totalValue: p.price * p.stock,
+        price: p.price
+      })),
+      // Si tienes datos de movimientos, incluye tendencias
+      recentMovements: movements.slice(0, 20).map(m => ({
+        productName: m.productName,
+        type: m.type,
+        quantity: m.quantity,
+        date: m.date
+      }))
+    };
+    
+    setInventoryAnalysisData(analysisData);
+  };
 
   // Calculate dashboard statistics
   const totalProducts = products.length > 0 ? products.length : mockProducts.length;
@@ -80,7 +133,13 @@ const DashboardPage: React.FC = () => {
   return (
     <MainLayout>
       <div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-6">Dashboard</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-4xl font-bold text-gray-900">Dashboard</h1>
+          <BotonRecomendaciones 
+            onClick={() => setIsRecommendationsOpen(true)}
+            delay={100}
+          />
+        </div>
         
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 md:mb-8">
@@ -175,6 +234,16 @@ const DashboardPage: React.FC = () => {
             </div>
           </RecentList>
         </div>
+
+        {/* AI Recommendations Modal */}
+        {isRecommendationsOpen && inventoryAnalysisData && (
+          <RecomendacionesIA 
+            isOpen={isRecommendationsOpen} 
+            onClose={() => setIsRecommendationsOpen(false)} 
+            inventoryData={inventoryAnalysisData}
+            delay={800}
+          />
+        )}
       </div>
     </MainLayout>
   );
