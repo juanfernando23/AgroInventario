@@ -39,6 +39,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_DATABASE=agroinventario
 JWT_SECRET=tu_clave_secreta_para_jwt
+VITE_OPENAI_API_KEY=tu_clave_api_de_openai
 ```
 
 2. Configura la base de datos ejecutando:
@@ -65,12 +66,38 @@ El backend de la aplicación proporciona una API REST para:
 - Gestión de inventario y movimientos
 - Procesamiento de ventas
 - Administración de usuarios
+- Recomendaciones inteligentes con IA
 
 Para iniciar solo el servidor backend:
 
 ```bash
 npm run server
 ```
+
+## Funcionalidad de Recomendaciones con IA
+
+AgroInventario incorpora un sistema de recomendaciones inteligentes basado en OpenAI que analiza los datos de inventario y proporciona:
+
+- Análisis diario del inventario con IA
+- Resumen del estado actual del inventario
+- Recomendaciones accionables para optimizar la gestión
+- Observaciones detalladas sobre tendencias y oportunidades
+
+Para habilitar esta funcionalidad, es necesario:
+
+1. Instalar la librería de OpenAI:
+
+```bash
+npm install openai
+```
+
+2. Configurar una clave de API de OpenAI en el archivo `.env`:
+
+```
+VITE_OPENAI_API_KEY=tu_clave_api_de_openai
+```
+
+Para más detalles sobre esta funcionalidad, consulta el archivo [RECOMENDACIONES-IA.md](./RECOMENDACIONES-IA.md) incluido en el proyecto.
 
 ## Verificación de código
 
@@ -96,6 +123,7 @@ Una vez que la aplicación esté en ejecución, puedes acceder con las siguiente
 - TailwindCSS
 - React Router
 - Lucide React (para iconos)
+- OpenAI API (para recomendaciones inteligentes)
 
 ### Backend
 - Express
