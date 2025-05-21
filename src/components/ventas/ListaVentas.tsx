@@ -12,9 +12,8 @@ interface SalesListProps {
 const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
   // Acceder al servicio de ventas para búsquedas
   const { searchSales, loading } = useSaleService();
-  
-  const [filters, setFilters] = useState({
-    customer: '',
+    const [filters, setFilters] = useState({
+    vendedor: '',
     dateFrom: '',
     dateTo: '',
   });
@@ -25,12 +24,11 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
       [name]: value
     }));
   };
-
   // Aplicar filtros a través de la API
   const handleApplyFilters = async () => {
     // Solo enviar filtros que tengan valor
     const filtersToApply: any = {};
-    if (filters.customer) filtersToApply.customer = filters.customer;
+    if (filters.vendedor) filtersToApply.userName = filters.vendedor; // Usamos userName que es el campo del vendedor en la BD
     if (filters.dateFrom) filtersToApply.dateFrom = filters.dateFrom;
     if (filters.dateTo) filtersToApply.dateTo = filters.dateTo;
     
@@ -40,7 +38,7 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
   // Limpiar filtros
   const handleClearFilters = () => {
     setFilters({
-      customer: '',
+      vendedor: '',
       dateFrom: '',
       dateTo: '',
     });
@@ -64,19 +62,18 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
   return (
     <div>      <div className="bg-white shadow rounded-lg p-6 mb-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Filtros</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label htmlFor="customer" className="block text-sm font-medium text-gray-700 mb-1">
-              Cliente
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">          <div>
+            <label htmlFor="vendedor" className="block text-sm font-medium text-gray-700 mb-1">
+              Vendedor
             </label>
             <input
-              id="customer"
-              name="customer"
+              id="vendedor"
+              name="vendedor"
               type="text"
-              value={filters.customer}
+              value={filters.vendedor}
               onChange={handleFilterChange}
               className="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md"
-              placeholder="Buscar por nombre de cliente"
+              placeholder="Buscar por nombre de vendedor"
             />
           </div>
           

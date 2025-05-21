@@ -145,10 +145,10 @@ export class SaleRepository {
       throw error;
     }
   }
-  
-  // Buscar ventas con filtros
+    // Buscar ventas con filtros
   static async search(filters: {
     customer?: string;
+    userName?: string; // Añadimos soporte para filtrar por vendedor
     dateFrom?: string;
     dateTo?: string;
   }): Promise<Sale[]> {
@@ -160,6 +160,12 @@ export class SaleRepository {
       if (filters.customer) {
         queryStr += ` AND customer ILIKE $${paramIndex}`;
         queryParams.push(`%${filters.customer}%`);
+        paramIndex++;
+      }
+      
+      if (filters.userName) {
+        queryStr += ` AND user_name ILIKE $${paramIndex}`;
+        queryParams.push(`%${filters.userName}%`);
         paramIndex++;
       }
       
