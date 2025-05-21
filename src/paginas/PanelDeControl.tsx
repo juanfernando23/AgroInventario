@@ -12,6 +12,7 @@ import { mockProducts } from '../data/SimulacionDatos';
 import { useMovementService } from '../services/MovementService';
 import { useProductService } from '../services/ProductService';
 import { Movement, Product } from '../types';
+import { formatCurrency } from '../utilities/format';
 
 const DashboardPage: React.FC = () => {
   const { movements, loading: movementsLoading } = useMovementService();
@@ -44,10 +45,10 @@ const DashboardPage: React.FC = () => {
 
   // Calculate dashboard statistics
   const totalProducts = products.length > 0 ? products.length : mockProducts.length;
-  const totalInventoryValue = (products.length > 0 ? products : mockProducts).reduce(
+  const totalInventoryValue = formatCurrency((products.length > 0 ? products : mockProducts).reduce(
     (total, product) => total + (product.price * product.stock), 
     0
-  ).toFixed(2);
+  ));
   
   const lowStockProducts = (products.length > 0 ? products : mockProducts).filter(
     product => product.stock <= product.minStock
@@ -92,7 +93,7 @@ const DashboardPage: React.FC = () => {
           />
           <StatCard 
             title="Valor Total del Inventario"
-            value={`$${totalInventoryValue}`}
+            value={totalInventoryValue}
             icon={<DollarSign className="h-6 w-6" />}
             color="green"
             delay={200}

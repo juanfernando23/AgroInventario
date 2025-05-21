@@ -3,6 +3,7 @@ import { Edit, Trash2, Search, Plus, AlertTriangle, Loader } from 'lucide-react'
 import { Product } from '../../types';
 import ProductForm from './FormularioProductos';
 import Modal from '../comun/Modal';
+import { formatCurrency } from '../../utilities/format';
 
 interface ProductListProps {
   products: Product[];
@@ -176,10 +177,9 @@ const ProductList: React.FC<ProductListProps> = ({
                           <div className="text-xs text-red-500">Stock bajo</div>
                         )}
                       </td>
-                      
-                      {/* Columna Precio */}
+                        {/* Columna Precio */}
                       <td className="px-6 py-4 text-sm text-gray-500">
-                        ${typeof product.price === 'number' ? product.price.toFixed(2) : parseFloat(String(product.price)).toFixed(2)}
+                        {formatCurrency(product.price)}
                       </td>
                       
                       {/* Columna Acciones */}
@@ -256,10 +256,9 @@ const ProductList: React.FC<ProductListProps> = ({
                       <div>
                         <p className="text-xs text-gray-500">Categoría</p>
                         <p className="text-sm">{product.category}</p>
-                      </div>
-                      <div>
+                      </div>                      <div>
                         <p className="text-xs text-gray-500">Precio</p>
-                        <p className="text-sm">${typeof product.price === 'number' ? product.price.toFixed(2) : parseFloat(String(product.price)).toFixed(2)}</p>
+                        <p className="text-sm">{formatCurrency(product.price)}</p>
                       </div>
                       <div>
                         <p className="text-xs text-gray-500">Stock</p>

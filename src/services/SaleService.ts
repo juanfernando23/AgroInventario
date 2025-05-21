@@ -149,10 +149,10 @@ export const useSaleService = () => {
     } finally {
       setLoading(false);
     }
-  };
-  // Buscar ventas con filtros
+  };  // Buscar ventas con filtros
   const searchSales = async (filters: {
     customer?: string;
+    userName?: string; // Añadimos soporte para filtrar por vendedor
     dateFrom?: string;
     dateTo?: string;
   }): Promise<void> => {
@@ -161,6 +161,7 @@ export const useSaleService = () => {
     try {
       // Construir parámetros de consulta
       const params = new URLSearchParams();      if (filters.customer) params.append('customer', filters.customer);
+      if (filters.userName) params.append('userName', filters.userName); // Filtro por vendedor
       if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
       if (filters.dateTo) params.append('dateTo', filters.dateTo);
       // Siempre añadir el parámetro sort=desc para asegurarnos de que el servidor devuelva las ventas más recientes primero

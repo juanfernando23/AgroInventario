@@ -1,6 +1,8 @@
+﻿// filepath: c:\Users\jball\OneDrive\Documentos\Programacion web\agroinventario2\main\AgroInventario\src\components\ventas\FormularioVentas.tsx
 import React, { useState } from 'react';
 import { Search, Trash2, ShoppingCart } from 'lucide-react';
 import { Product, SaleItem } from '../../types';
+import { formatCurrency } from '../../utilities/format';
 
 interface SalesFormProps {
   products: Product[];
@@ -9,15 +11,14 @@ interface SalesFormProps {
     date: string;
     items: SaleItem[];
     total: number;
-    estado?: string;
   }) => void;
 }
 
 const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
-  const [searchTerm, setSearchTerm] = useState('');  const [customer, setCustomer] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [customer, setCustomer] = useState('');
   // Ya no usaremos la fecha como un campo editable, solo como valor inicial
   const [cartItems, setCartItems] = useState<SaleItem[]>([]);
-  const [estado, setEstado] = useState<string>('completada');
 
   const searchResults = searchTerm 
     ? products.filter(p => 
@@ -25,6 +26,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
         p.sku.toLowerCase().includes(searchTerm.toLowerCase())
       ).slice(0, 5)
     : [];
+  
   const handleAddToCart = (product: Product) => {
     // Check if product already exists in cart
     const existingItem = cartItems.find(item => item.productId === product.id);
@@ -76,6 +78,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
     // Clear search
     setSearchTerm('');
   };
+  
   const handleQuantityChange = (productId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
     
@@ -106,6 +109,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
   };
 
   const totalAmount = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
+  
   const handleConfirmSale = () => {
     if (cartItems.length === 0) return;
     
@@ -116,19 +120,17 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
       customer,
       date: currentDateTime, // Usar fecha y hora actual
       items: cartItems,
-      total: totalAmount,
-      estado
+      total: totalAmount
     });
     
     // Reset form
     setCartItems([]);
     setCustomer('');
-    setEstado('completada');
   };
+  
   const handleCancelSale = () => {
     setCartItems([]);
     setCustomer('');
-    setEstado('completada');
   };
 
   return (
@@ -171,7 +173,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
                         {product.stock}
                       </span> {product.unit}
                     </div>
-                    <div className="text-sm font-medium">${product.price.toFixed(2)}</div>
+                    <div className="text-sm font-medium">{formatCurrency(product.price)}</div>
                   </div>
                   <button
                     type="button"
@@ -236,7 +238,8 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{item.productName}</div>
                         <div className="text-sm text-gray-500">{item.productSku}</div>
-                      </td>                      <td className="px-6 py-4 whitespace-nowrap">
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <button
                             onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
@@ -273,10 +276,10 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${item.price.toFixed(2)}
+                        {formatCurrency(item.price)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        ${item.subtotal.toFixed(2)}
+                        {formatCurrency(item.subtotal)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
@@ -327,32 +330,12 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
                   <p className="mt-1 text-xs text-gray-500">Se registrará la fecha y hora actual al confirmar la venta</p>
                 </div>
               </div>
-              
-              <div className="sm:col-span-3">
-                <label htmlFor="estado" className="block text-sm font-medium text-gray-700 text-left mb-2">
-                  Estado de Venta
-                </label>
-                <div>
-                  <select
-                    id="estado"
-                    value={estado}
-                    onChange={(e) => setEstado(e.target.value)}
-                    className="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
-                  >
-                    <option value="completada">Completada</option>
-                    <option value="pendiente">Pendiente</option>
-                    <option value="cancelada">Cancelada</option>
-                  </select>
-                </div>
-              </div>
             </div>
-            
-            <div className="border-t border-gray-200 pt-4">
+              <div className="border-t border-gray-200 pt-4">
               <div className="flex justify-between text-base font-medium text-gray-900">
                 <p>Total</p>
-                <p>${totalAmount.toFixed(2)}</p>
+                <p>{formatCurrency(totalAmount)}</p>
               </div>
-              <p className="mt-0.5 text-sm text-gray-500">Impuestos incluidos.</p>
             </div>
             
             <div className="mt-6 flex justify-end space-x-4">

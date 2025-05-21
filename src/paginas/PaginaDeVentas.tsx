@@ -8,12 +8,13 @@ import { Sale, SaleItem } from '../types';
 import { ClipboardList, ShoppingCart } from 'lucide-react';
 import { useProductService } from '../services/ProductService';
 import { useSaleService } from '../services/SaleService';
+import { useAuthService } from '../services/AuthService';
 import { useNotification } from '../context/NotificationContext';
 
-const SalesPage: React.FC = () => {
-  // Servicios y contextos
-  const { products, loading: productsLoading } = useProductService();
-  const { sales, loading: salesLoading, error: salesError, addSale, searchSales, loadSales } = useSaleService();
+const SalesPage: React.FC = () => {  // Servicios y contextos
+  const { products } = useProductService();
+  const { sales, addSale, loadSales } = useSaleService();
+  const { user } = useAuthService();
   const { showNotification } = useNotification();
 
   // Estados del componente
@@ -23,9 +24,6 @@ const SalesPage: React.FC = () => {
   const [showSaleDetails, setShowSaleDetails] = useState(false);
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
 
-  // Usuario simulado - En una app real, obtendríamos esto de un contexto de autenticación
-  const currentUser = { id: '1', name: 'Admin Usuario' };
-
   // Manejar la confirmación de una nueva venta  // Cargar ventas al cambiar a la vista de historial
   useEffect(() => {
     if (view === 'history') {
@@ -33,28 +31,33 @@ const SalesPage: React.FC = () => {
       loadSales();
     }
   }, [view, loadSales]);
-  const handleConfirmSale = async (saleData: {
+  // Verificar que exista un usuario para la funcionalidad de vendedor
+  useEffect(() => {
+    // Si no hay usuario autenticado, usaremos un usuario por defecto para las ventas
+    // No mostramos ningún mensaje de error
+  }, [user]);const handleConfirmSale = async (saleData: {
     customer: string;
     date: string;
     items: SaleItem[];
     total: number;
-    estado?: string;
   }) => {
     try {
-      // Prepare the sale data with user info
+      // Si no hay usuario, usamos un usuario predeterminado
+      const currentUser = user ? user : { id: '1', name: 'Vendedor Predeterminado' };
+      
+      // Prepare the sale data with user info from auth session or default
       const fullSaleData = {
         ...saleData,
         userId: currentUser.id,
         userName: currentUser.name
       };
-      
-      // Add the sale via API
+        // Add the sale via API
       const newSale = await addSale(fullSaleData);
       
       // Show success message
       setLastSaleId(newSale.id);
       setShowSuccessMessage(true);
-      showNotification('success', `Venta #${newSale.id} registrada correctamente`);
+      showNotification('success', `Venta #${newSale.id} registrada correctamente por ${fullSaleData.userName}`);
       
       // Hide success message after 5 seconds
       setTimeout(() => {
@@ -120,12 +123,19 @@ const SalesPage: React.FC = () => {
               </div>
             </div>
           </div>
-        )}
-        
-        {view === 'form' ? (          <SalesForm 
-            products={products || []} 
-            onConfirmSale={handleConfirmSale} 
-          />
+        )}          {view === 'form' ? (
+          <>
+            <div className="bg-white shadow rounded-lg p-6 mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Vendedor Actual</h3>
+              <p className="text-sm text-gray-600">
+                Esta venta será registrada por <span className="font-semibold">{user ? user.name : 'Vendedor Predeterminado'}</span> como vendedor
+              </p>
+            </div>
+            <SalesForm 
+              products={products || []} 
+              onConfirmSale={handleConfirmSale} 
+            />
+          </>
         ) : (
           <SalesList 
             sales={sales}
