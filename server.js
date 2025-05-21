@@ -211,6 +211,7 @@ app.get('/api/sales/search', async (req, res) => {
   try {
     const filters = {
       customer: req.query.customer,
+      userName: req.query.userName, // Agregamos soporte para filtrar por vendedor
       dateFrom: req.query.dateFrom,
       dateTo: req.query.dateTo
     };

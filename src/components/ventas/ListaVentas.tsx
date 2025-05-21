@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, Search, RefreshCw } from 'lucide-react';
 import { Sale } from '../../types';
 import { useSaleService } from '../../services/SaleService';
@@ -12,11 +12,13 @@ interface SalesListProps {
 const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
   // Acceder al servicio de ventas para búsquedas
   const { searchSales, loading } = useSaleService();
-    const [filters, setFilters] = useState({
+  // Estado local para los filtros
+  const [filters, setFilters] = useState({
     vendedor: '',
     dateFrom: '',
     dateTo: '',
   });
+  
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFilters(prev => ({
@@ -24,28 +26,37 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
       [name]: value
     }));
   };
+
   // Aplicar filtros a través de la API
   const handleApplyFilters = async () => {
-    // Solo enviar filtros que tengan valor
-    const filtersToApply: any = {};
-    if (filters.vendedor) filtersToApply.userName = filters.vendedor; // Usamos userName que es el campo del vendedor en la BD
-    if (filters.dateFrom) filtersToApply.dateFrom = filters.dateFrom;
-    if (filters.dateTo) filtersToApply.dateTo = filters.dateTo;
-    
-    await searchSales(filtersToApply);
+    try {
+      // Solo enviar filtros que tengan valor
+      const filtersToApply: any = {};
+      if (filters.vendedor) filtersToApply.userName = filters.vendedor; // Usamos userName que es el campo del vendedor en la BD
+      if (filters.dateFrom) filtersToApply.dateFrom = filters.dateFrom;
+      if (filters.dateTo) filtersToApply.dateTo = filters.dateTo;
+      
+      // El resultado actualizado estará disponible en 'sales' a través de las props
+      await searchSales(filtersToApply);
+    } catch (error) {
+      console.error("Error al aplicar filtros:", error);
+    }
   };
-
   // Limpiar filtros
-  const handleClearFilters = () => {
+  const handleClearFilters = async () => {
     setFilters({
       vendedor: '',
       dateFrom: '',
       dateTo: '',
     });
-    searchSales({}); // Buscar sin filtros para mostrar todos
+    
+    try {
+      // Buscar sin filtros para mostrar todos
+      await searchSales({});
+    } catch (error) {
+      console.error("Error al limpiar filtros:", error);
+    }
   };
-
-  const filteredSales = sales;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -157,7 +168,7 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">              {filteredSales.length === 0 ? (
+            <tbody className="bg-white divide-y divide-gray-200">              {sales.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-4 text-center text-sm text-gray-500">
                     No se encontraron ventas que coincidan con los filtros.
@@ -165,7 +176,7 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
                 </tr>
               ) : (
                 // Nos aseguramos de que las ventas estén ordenadas por fecha descendente (más recientes primero)
-                [...filteredSales].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((sale) => (
+                [...sales].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((sale) => (
                   <tr key={sale.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       #{sale.id}

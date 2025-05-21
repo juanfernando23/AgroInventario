@@ -66,15 +66,27 @@ const ProductForm: React.FC<ProductFormProps> = ({
       });
     }
   }, [product]);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'price' || name === 'stock' || name === 'minStock' 
-        ? parseFloat(value) || 0 
-        : value
-    }));
+    
+    if (name === 'price') {
+      // Solo permitir números y punto decimal en el campo de precio
+      const numericValue = value.replace(/[^0-9.]/g, '');
+      // Evitar múltiples puntos decimales
+      const validatedValue = numericValue.split('.').slice(0, 2).join('.');
+      
+      setFormData(prev => ({
+        ...prev,
+        [name]: validatedValue === '' ? 0 : parseFloat(validatedValue) || 0
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: name === 'stock' || name === 'minStock' 
+          ? parseFloat(value) || 0 
+          : value
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -169,8 +181,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
         </div>
 
         {/* Price, Unit y Min Stock en fila para escritorio, columna para móvil */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Price */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">          {/* Price */}
           <div className="w-full">
             <label htmlFor="price" className="block text-sm font-medium text-gray-700 text-left mb-2">
               Precio Unit.
@@ -178,16 +189,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
             <div className="relative rounded-md shadow-sm">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <span className="text-gray-500 sm:text-sm">$</span>
-              </div>
-              <input
-                type="number"
+              </div>              <input
+                type="text"
                 name="price"
                 id="price"
-                min="0"
-                step="0.01"
                 required
-                value={formData.price}
+                value={formData.price === 0 ? '' : formData.price}
                 onChange={handleInputChange}
+                placeholder="0"
                 className="focus:ring-green-500 focus:border-green-500 block w-full pl-7 pr-12 sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
               />
             </div>
