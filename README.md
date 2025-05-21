@@ -118,7 +118,7 @@ Una vez que la aplicación esté en ejecución, puedes acceder con las siguiente
 
 ## Capturas de pantalla
 
-![Pantalla principal de AgroInventario](image.png)
+![Pantalla principal de AgroInventario](image-1.png)
 
 
 
