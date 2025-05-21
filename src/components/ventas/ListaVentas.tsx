@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Eye, Search, RefreshCw } from 'lucide-react';
 import { Sale } from '../../types';
 import { useSaleService } from '../../services/SaleService';
+import { formatCurrency } from '../../utilities/format';
 
 interface SalesListProps {
   sales: Sale[];
@@ -189,9 +190,8 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {sale.customer || 'Cliente no registrado'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      ${sale.total.toFixed(2)}
+                    </td>                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {formatCurrency(sale.total)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {sale.items.length} {sale.items.length === 1 ? 'producto' : 'productos'}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Trash2, ShoppingCart } from 'lucide-react';
 import { Product, SaleItem } from '../../types';
+import { formatCurrency } from '../../utilities/format';
 
 interface SalesFormProps {
   products: Product[];
@@ -171,7 +172,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
                         {product.stock}
                       </span> {product.unit}
                     </div>
-                    <div className="text-sm font-medium">${product.price.toFixed(2)}</div>
+                    <div className="text-sm font-medium">{formatCurrency(product.price)}</div>
                   </div>
                   <button
                     type="button"
@@ -271,12 +272,11 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
                         }`}>
                           Stock disponible: {(products.find(p => p.id === item.productId)?.stock || 0)}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        ${item.price.toFixed(2)}
+                      </td>                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatCurrency(item.price)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        ${item.subtotal.toFixed(2)}
+                        {formatCurrency(item.subtotal)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
@@ -347,10 +347,9 @@ const SalesForm: React.FC<SalesFormProps> = ({ products, onConfirmSale }) => {
               </div>
             </div>
             
-            <div className="border-t border-gray-200 pt-4">
-              <div className="flex justify-between text-base font-medium text-gray-900">
+            <div className="border-t border-gray-200 pt-4">              <div className="flex justify-between text-base font-medium text-gray-900">
                 <p>Total</p>
-                <p>${totalAmount.toFixed(2)}</p>
+                <p>{formatCurrency(totalAmount)}</p>
               </div>
               <p className="mt-0.5 text-sm text-gray-500">Impuestos incluidos.</p>
             </div>
