@@ -59,15 +59,7 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
       minute: '2-digit'
     });
   };
-
-  const getEstadoVentaClass = (estado?: string) => {
-    switch(estado) {
-      case 'completada': return 'bg-green-100 text-green-800';
-      case 'pendiente': return 'bg-yellow-100 text-yellow-800';
-      case 'cancelada': return 'bg-red-100 text-red-800';
-      default: return 'bg-green-100 text-green-800';
-    }
-  };
+  // La función getEstadoVentaClass ha sido eliminada
 
   return (
     <div>      <div className="bg-white shadow rounded-lg p-6 mb-6">
@@ -157,12 +149,8 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Total
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                </th>                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Productos
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Vendedor
@@ -192,14 +180,8 @@ const SalesList: React.FC<SalesListProps> = ({ sales, onViewDetails }) => {
                       {sale.customer || 'Cliente no registrado'}
                     </td>                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {formatCurrency(sale.total)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    </td>                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {sale.items.length} {sale.items.length === 1 ? 'producto' : 'productos'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getEstadoVentaClass(sale.estado)}`}>
-                        {sale.estado || 'Completada'}
-                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {sale.userName}
