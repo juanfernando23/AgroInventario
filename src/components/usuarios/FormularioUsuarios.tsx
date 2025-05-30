@@ -129,13 +129,13 @@ const UserForm: React.FC<UserFormProps> = ({
             <label htmlFor="role" className="block text-sm font-medium text-gray-700 text-left mb-2">
               Rol
             </label>
-            <div className="relative">
-              <select
+            <div className="relative">              <select
                 id="role"
                 name="role"
                 value={formData.role}
                 onChange={handleInputChange}
-                className="appearance-none shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
+                className="appearance-none shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 text-ellipsis overflow-hidden"
+                style={{ paddingRight: '2rem' }}
               >
                 <option value="admin">Administrador</option>
                 <option value="employee">Empleado</option>
@@ -152,13 +152,13 @@ const UserForm: React.FC<UserFormProps> = ({
             <label htmlFor="status" className="block text-sm font-medium text-gray-700 text-left mb-2">
               Estado
             </label>
-            <div className="relative">
-              <select
+            <div className="relative">              <select
                 id="status"
                 name="status"
                 value={formData.status}
                 onChange={handleInputChange}
-                className="appearance-none shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
+                className="appearance-none shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 text-ellipsis overflow-hidden"
+                style={{ paddingRight: '2rem' }}
               >
                 <option value="active">Activo</option>
                 <option value="inactive">Inactivo</option>

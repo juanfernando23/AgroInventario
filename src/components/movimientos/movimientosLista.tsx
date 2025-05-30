@@ -150,13 +150,13 @@ const MovementsList: React.FC<MovementsListProps> = ({
           <div>
             <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">
               Tipo de Movimiento
-            </label>
-            <select
+            </label>            <select
               id="type"
               name="type"
               value={filters.type}
               onChange={handleFilterChange}
-              className="shadow-sm focus:ring-[#4b7480] focus:border-[#4b7480] block w-full sm:text-sm border-gray-300 rounded-md"
+              className="shadow-sm focus:ring-[#4b7480] focus:border-[#4b7480] block w-full sm:text-sm border-gray-300 rounded-md text-ellipsis overflow-hidden"
+              style={{ paddingRight: '2rem' }}
             >
               <option value="">Todos</option>
               <option value="entrada">Entrada</option>

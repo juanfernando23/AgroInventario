@@ -61,8 +61,7 @@ const MovementForm: React.FC<MovementFormProps> = ({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex flex-col gap-y-5">
-        {/* Tipo de Movimiento */}
-        <div className="w-full">
+        {/* Tipo de Movimiento */}        <div className="w-full">
           <label htmlFor="type" className="block text-sm font-medium text-gray-700 text-left mb-2">
             Tipo de Movimiento
           </label>
@@ -73,7 +72,7 @@ const MovementForm: React.FC<MovementFormProps> = ({
               required
               value={formData.type}
               onChange={handleInputChange}
-              className="appearance-none shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
+              className="appearance-none shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 text-ellipsis overflow-hidden"
             >
               <option value="entrada">Entrada</option>
               <option value="salida">Salida</option>
@@ -91,21 +90,22 @@ const MovementForm: React.FC<MovementFormProps> = ({
         <div className="w-full">
           <label htmlFor="productId" className="block text-sm font-medium text-gray-700 text-left mb-2">
             Producto
-          </label>
-          <div className="relative">
+          </label>          <div className="relative">
             <select
               id="productId"
               name="productId"
               required
               value={formData.productId}
               onChange={handleInputChange}
-              className="appearance-none shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
-            >              <option value="">Seleccione un producto</option>
+              className="appearance-none shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 text-ellipsis overflow-hidden"
+              style={{ paddingRight: '2rem', textOverflow: 'ellipsis' }}
+            >
+              <option value="">Seleccione un producto</option>
               {productsLoading ? (
                 <option value="" disabled>Cargando productos...</option>
               ) : products.length > 0 ? (
                 products.map(product => (
-                  <option key={product.id} value={product.id}>
+                  <option key={product.id} value={product.id} title={`${product.name} - SKU: ${product.sku}`}>
                     {product.name} - SKU: {product.sku}
                   </option>
                 ))

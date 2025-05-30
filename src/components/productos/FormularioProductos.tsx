@@ -158,14 +158,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
         <div className="w-full">
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 text-left mb-2">
             Categoría
-          </label>
-          <div className="relative">
+          </label>          <div className="relative">
             <select
               id="category"
               name="category"
               value={formData.category}
               onChange={handleInputChange}
-              className="appearance-none shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
+              className="appearance-none shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 text-ellipsis overflow-hidden"
+              style={{ paddingRight: '2rem' }}
             >
               <option value="">Seleccione una categoría</option>
               {categoryOptions.map(category => (
@@ -206,14 +206,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
           <div className="w-full">
             <label htmlFor="unit" className="block text-sm font-medium text-gray-700 text-left mb-2">
               Unidad Med.
-            </label>
-            <div className="relative">
+            </label>            <div className="relative">
               <select
                 id="unit"
                 name="unit"
                 value={formData.unit}
                 onChange={handleInputChange}
-                className="appearance-none shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 h-10"
+                className="appearance-none shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-2 border-gray-300 rounded-md bg-white p-3 text-ellipsis overflow-hidden"
+                style={{ paddingRight: '2rem' }}
               >
                 {unitOptions.map(unit => (
                   <option key={unit} value={unit}>{unit}</option>
